@@ -1,0 +1,36 @@
+#hero-section {
+    background: url("/blurry-gradient-haikei.svg") no-repeat center;
+    background-size: cover;
+    /* aspect-ratio: 16/9; */
+    /* width: 100vw;
+    height: 100vh; */
+}
+
+.hero-section-img {
+    filter: drop-shadow(20px 20px 10px rgba(0, 0, 0, 0.164));
+}
+
+.promotional-list>li {
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 0 8px 1px rgba(0, 0, 0, 0.09);
+    border-radius: 16px;
+}
+
+.promotional-list>li>.list-after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #00B4D8;
+    transform: translateY(100%);
+    transition: all;
+    transition-duration: 0.6s;
+    transition-timing-function: cubic-bezier(0.215, 0.610, 0.355, 1);
+}
+
+.promotional-list>li:hover .list-after {
+    transform: translateY(0);
+}

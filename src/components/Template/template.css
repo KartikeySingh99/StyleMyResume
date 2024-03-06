@@ -1,0 +1,31 @@
+.template {
+    overflow: hidden;
+}
+
+.template button {
+    display: none;
+    transition: all;
+    transition-duration: 0.8s;
+    transition-timing-function: step-start;
+}
+
+.template::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    transition: all;
+    transition-duration: 1s;
+    transition-timing-function: cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+.template:hover::after {
+    background-color: rgba(0, 0, 0, 0.133);
+    backdrop-filter: blur(2px);
+}
+
+.template:hover button {
+    display: block;
+}

@@ -1,0 +1,17 @@
+.img {
+    object-fit: cover;
+    width: 800px;
+}
+
+.img::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 10;
+    width: 800px;
+    background-color: rgba(0, 0, 0, 0.397);
+    backdrop-filter: blur(2px);
+}
