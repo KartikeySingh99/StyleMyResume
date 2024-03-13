@@ -1,18 +1,18 @@
 import { SignUp as SignUpForm } from "../../components/Login/SignUp";
-import Signup_Logo from "/login_page_pic.jpg";
+import Signup_Logo from "/login__image.svg";
 
 const SignUp = () => {
-    return (
-        <div className="min-h-[80vh] mx-24 flex flex-col items-center justify-center">
-            <div className="flex items-center justify-around w-full">
-                <div className="relative">
-                    <img src={Signup_Logo} className="" width={400} alt="" />
-                    <h1 className="text-center text-3xl font-extrabold font-heading text-primary absolute top-36 z-10">Design Your Resume With One Click</h1>
-                </div>
-                <SignUpForm />
-            </div>
+  return (
+    <div className="w-full h-screen py-3 px-6 flex flex-col items-center justify-center">
+      <div className="flex flex-col-reverse lg:flex-row items-center justify-around w-full h-full">
+        <div className="hidden h-full lg:flex items-center justify-center flex-col">
+          <img src={Signup_Logo} className="object-contain w-[20rem]" width={500} alt="" />
+          <h1 className="mt-6 text-center text-3xl font-extrabold font-heading text-primary">Design Your Resume With One Click</h1>
         </div>
-    )
+        <SignUpForm />
+      </div>
+    </div>
+  )
 }
 
 export default SignUp

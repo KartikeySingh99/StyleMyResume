@@ -7,13 +7,13 @@ import { useForm, Controller, useFieldArray } from "react-hook-form";
 import PropTypes from "prop-types";
 import { useState } from 'react';
 import AddIcon from '@mui/icons-material/Add';
+import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
 import { Tooltip } from '@mui/material';
-import RemoveIcon from '@mui/icons-material/Remove';
 
 const Form = ({ sectionName, label, defaultValues = {}, formFields, dynamicFields, onSubmit, setValue, value }) => {
 
     const { control, handleSubmit } = useForm({ defaultValues })
-    const { fields, append } = useFieldArray({ control, name: `${label}Array` })
+    const { fields, append, remove } = useFieldArray({ control, name: `${label}Array` })
 
     const [expanded, setExpanded] = useState(0)
 
@@ -39,32 +39,37 @@ const Form = ({ sectionName, label, defaultValues = {}, formFields, dynamicField
                 <form className='text-center' onSubmit={handleSubmit(onSubmit)}>
                     {
                         fields.map((item, i) => (
-                            < Accordion key={item.id} expanded={expanded === i} onChange={handleChange(i)} >
-                                <AccordionSummary
-                                    expandIcon={<ExpandMoreIcon />}
-                                    aria-controls="panel1a-content"
-                                    id="panel1a-header"
-                                >
-                                    <div className='flex items-center justify-center gap-x-4'>
-                                        <h1 className='text-sm font-semibold'>{sectionName} {i + 1}</h1>
-                                    </div>
-                                </AccordionSummary>
 
-                                <AccordionDetails>
-                                    <div className='flex justify-center flex-wrap gap-x-4 gap-y-2 lg:gap-y-4 w-full'>
-                                        {
-                                            dynamicFields && dynamicFields.map((item, j) => (
-                                                <Controller
-                                                    key={j}
-                                                    name={`${label}Array[${i}].${item.name}`}
-                                                    control={control}
-                                                    render={({ field }) => <TextField type={item.type} {...field} name={item.name} label={item.name} placeholder={item.placeholder} variant="outlined" margin='dense' />}
-                                                />
-                                            ))
-                                        }
-                                    </div>
-                                </AccordionDetails>
-                            </Accordion>
+                            <div key={item.id} className='w-full flex items-start justify-center gap-x-2'>
+                                < Accordion key={item.id} className='w-full' expanded={expanded === i} onChange={handleChange(i)} >
+                                    <AccordionSummary
+                                        expandIcon={<ExpandMoreIcon />}
+                                        aria-controls="panel1a-content"
+                                        id="panel1a-header"
+                                    >
+                                        <div className='flex items-center justify-center gap-x-4'>
+                                            <h1 className='text-sm font-semibold'>{sectionName} {i + 1}</h1>
+                                        </div>
+                                    </AccordionSummary>
+
+                                    <AccordionDetails>
+                                        <div className='flex justify-center flex-wrap gap-x-4 gap-y-2 lg:gap-y-4 w-full'>
+                                            {
+                                                dynamicFields && dynamicFields.map((item, j) => (
+                                                    <Controller
+                                                        key={j}
+                                                        name={`${label}Array[${i}].${item.name}`}
+                                                        control={control}
+                                                        render={({ field }) => <TextField type={item.type} {...field} name={item.name} label={item.name} placeholder={item.placeholder} variant="outlined" margin='dense' />}
+                                                    />
+                                                ))
+                                            }
+                                        </div>
+                                    </AccordionDetails>
+                                </Accordion>
+                                <button className='text-red-500' onClick={() => remove(item.id)}><RemoveCircleIcon fontSize='medium' /></button>
+
+                            </div>
                         ))
                     }
                     <div className='flex my-4 gap-y-2 gap-x-4 lg:gap-y-4 justify-center flex-col lg:flex-row flex-wrap'>

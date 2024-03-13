@@ -8,7 +8,7 @@ import EditField from "../../components/User/EditField";
 
 const Profile = () => {
     const dispatch = useDispatch();
-    const navigate=useNavigate();
+    const navigate = useNavigate();
 
     const { user, loading, isUpdated } = useSelector((state) => state.user)
     const { userData } = useSelector((state) => state.authStatus);
@@ -71,7 +71,7 @@ const Profile = () => {
     return (
         <>
             <div className="w-full h-screen py-16">
-                <div className="flex items-center justify-center flex-col border px-6 py-3">
+                <div className="flex items-center justify-center flex-col">
                     <div className="bg-gray-100">
                         <div className="container mx-auto py-8">
                             <div className="grid grid-cols-4 sm:grid-cols-12 gap-6 px-4">
@@ -86,7 +86,7 @@ const Profile = () => {
                                             {renderField('Designation', personalData.Designation, setPersonalData)} */}
                                             <p className="text-gray-700">{personalData?.Designation}</p>
                                             <div className="mt-6 flex flex-wrap gap-4 justify-center">
-                                                <button className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded" onClick={()=>navigate('/edit')}>Edit Data</button>
+                                                <button className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded" onClick={() => navigate('/edit')}>Edit Data</button>
                                                 <button className="bg-gray-300 hover:bg-gray-400 text-gray-700 py-2 px-4 rounded">Resume</button>
                                             </div>
                                         </div>
@@ -114,15 +114,15 @@ const Profile = () => {
                                             expirienceData && expirienceData.map((data, i) => (
                                                 <div key={i} className="mb-6">
                                                     <div className="flex justify-between flex-wrap gap-2 w-full">
-                                                        <span className="text-gray-700 font-bold" onDoubleClick={() => handleEditable("JobProfile")}>{data.Profile}</span>
-                                                        <p>
-                                                            <span className="text-gray-700 mr-2">at {data?.Company}</span>
-                                                            <span className="text-gray-700">{data.From} - {data.To}</span>
-                                                        </p>
+                                                        <p className="text-gray-700 font-bold" onDoubleClick={() => handleEditable("JobProfile")}>{data.Profile} | {data?.Company}</p>
+                                                        <span className="text-gray-700">{data.From} - {data.To}</span>
                                                     </div>
-                                                    <p className="mt-2">
-                                                        {data.Responsibilities}
-                                                    </p>
+                                                    <div className="mt-2">
+                                                        <p className="font-semibold">Responsibilities</p>
+                                                        <ul>
+                                                            <li>{data.Responsibilities}</li>
+                                                        </ul>
+                                                    </div>
                                                 </div>
                                             ))
                                         }

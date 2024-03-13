@@ -14,6 +14,7 @@ import DetailsPage from './pages/Details/DetailsPage';
 import EditDetails from './pages/Details/EditDetails';
 import ProtectedRoute from "./components/Auth/ProtectedRoute";
 import { ToastContainer, toast } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
 import TemplatePage from './pages/Templates/TemplatePage';
 import Profile from './pages/User/Profile';
 import Template1 from './pages/Templates/Template1';

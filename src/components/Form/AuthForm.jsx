@@ -103,7 +103,7 @@ const AuthForm = ({ onSubmit, formHeading, type }) => {
 
     return (
         <div className='text-center'>
-            <h1 className="text-white lg:text-black text-3xl font-extrabold font-heading">{formHeading}</h1>
+            <h1 className="text-primary text-3xl font-extrabold font-heading">{formHeading}</h1>
 
             <form onSubmit={handleSubmit(onSubmit)} className='my-4 flex flex-col items-center justify-center gap-y-4 w-full '>
                 {
@@ -112,7 +112,7 @@ const AuthForm = ({ onSubmit, formHeading, type }) => {
                         item.field
                     ))
                 }
-                <button className='bg-color1 hover:bg-primary text-white px-8 py-2 rounded-full text-center mt-6 font-bold' type='submit'>{formHeading}</button>
+                <button className='bg-primary text-white px-8 py-2 rounded-full text-center mt-6 font-bold' type='submit'>{formHeading}</button>
 
             </form>
         </div>

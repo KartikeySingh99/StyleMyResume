@@ -26,7 +26,7 @@ const Demo = () => {
         }
     }, [dispatch, userData])
 
-    const { personalDetails, educationalDetails, expirienceDetails, skillDetails, projectDetails } = user;
+    // const { personalDetails, educationalDetails, expirienceDetails, skillDetails, projectDetails } = user;
 
     // console.log(user);
 
@@ -35,20 +35,18 @@ const Demo = () => {
         :
         (
             <>
-                <div className="flex items-center justify-center bg-gray-100 my-16 overflow-hidden">
-                    <div ref={componentRef} className="scale-100 md:scale-100 w-[794px] rounded-lg bg-white">
-                        {/* top content */}
-                        <div className="flex rounded-t-lg border-b-2 sm:px-2 w-full">
-                            {/* <div className="h-40 w-40 overflow-hidden sm:rounded-full sm:relative sm:p-0 top-10 left-5 p-3">
-                                <img src="https://media.licdn.com/dms/image/C4D03AQH8qidO0nb_Ng/profile-displayphoto-shrink_800_800/0/1615696897070?e=2147483647&v=beta&t=ia3wfE2J7kVLdBy9ttkgUDAA_ul29fymykhQo0lABDo" />
-                            </div> */}
+                <div className="flex items-center justify-center flex-col gap-y-4 bg-gray-100 md:py-16 overflow-hidden">
+                    <div ref={componentRef} className="scale-50 md:scale-100 w-[794px] rounded-lg bg-white">
+                        <div className="flex rounded-t-lg sm:px-2 w-full">
                             <div className="my-4 flex items-center justify-center gap-y-2 flex-col text-center pl-5 w-full">
                                 <p className="font-poppins font-bold text-heading sm:text-4xl text-2xl">
-                                    {personalDetails?.Name}
+                                    {user?.personalDetails?.Name}
                                 </p>
-                                <p className="font-semibold text-lg">{personalDetails?.Designation}</p>
+                                <p className="font-semibold text-lg">{user?.personalDetails?.Designation}</p>
                             </div>
                         </div>
+                        <div className="border-2 w-full text-center my-3" />
+
                         {/* main content */}
                         <div className="p-5">
                             <div className="grid grid-cols-2 gap-x-2">
@@ -60,15 +58,15 @@ const Demo = () => {
                                         <div>
                                             <div className="flex items-start justify-start gap-x-2 my-1">
                                                 <a className="text-gray-700" href=""><EmailIcon fontSize="medium" /></a>
-                                                <p className="truncate">{personalDetails?.Email}</p>
+                                                <p className="truncate">{user?.personalDetails?.Email}</p>
                                             </div>
                                             <div className="flex items-start justify-start gap-x-2 my-1">
                                                 <a className="text-gray-700" href=""><PhoneIcon fontSize="medium" /></a>
-                                                <p className="text-md">{personalDetails?.PhoneNumber}</p>
+                                                <p className="text-md">{user?.personalDetails?.PhoneNumber}</p>
                                             </div>
                                             <div className="flex items-start justify-start gap-x-2 my-1">
                                                 <a className="text-gray-700" href=""><HomeIcon fontSize="medium" /></a>
-                                                <p className="text-md">{personalDetails?.Address}</p>
+                                                <p className="text-md">{user?.personalDetails?.Address}</p>
                                             </div>
                                             <div className="flex items-start justify-start gap-x-2 my-1">
                                                 <a className="text-gray-700" href=""><LinkedInIcon fontSize="medium" /></a>
@@ -81,13 +79,13 @@ const Demo = () => {
                                         </div>
                                     </div>
                                     {/* Skills */}
-                                    {skillDetails &&
+                                    {user?.skillDetails &&
                                         <div className="py-3 sm:order-none order-2">
                                             <h2 className="text-lg font-poppins font-bold text-top-color">Skills</h2>
                                             <div className="border-2 w-20 border-top-color my-3" />
                                             <div>
                                                 {
-                                                    skillDetails && skillDetails.map((data, i) => (
+                                                    user?.skillDetails && user?.skillDetails.map((data, i) => (
 
                                                         <div key={i} className="flex items-center my-1">
                                                             <a className="w-6 text-gray-700 hover:text-orange-600">
@@ -104,13 +102,13 @@ const Demo = () => {
                                         </div>
                                     }
                                     {/* Education Background */}
-                                    {educationalDetails &&
+                                    {user?.educationalDetails &&
                                         <div className="py-3 sm:order-none order-1">
                                             <h2 className="text-lg font-poppins font-bold text-top-color">Education Background</h2>
                                             <div className="border-2 w-20 border-top-color my-3" />
                                             <div className="flex flex-col space-y-1">
                                                 {
-                                                    educationalDetails?.educationDetailsArray.map((data, i) => (
+                                                    user?.educationalDetails?.educationDetailsArray.map((data, i) => (
                                                         <div key={i} className="flex flex-col">
                                                             <div className="flex items-center justify-between">
                                                                 <p className="text-sm font-semibold">
@@ -119,8 +117,8 @@ const Demo = () => {
                                                                 <p className="font-bold text-xs text-gray-700">{data.Year}</p>
                                                             </div>
                                                             <div className="flex items-center justify-between">
-                                                            <p className="text-sm text-gray-700 font-semibold">{data.InstituteName}</p>
-                                                            <p className="font-bold text-xs text-gray-700 mb-2">{data.Marks}%</p>
+                                                                <p className="text-sm text-gray-700 font-semibold">{data.InstituteName}</p>
+                                                                <p className="font-bold text-xs text-gray-700 mb-2">{data.Marks}%</p>
                                                             </div>
                                                         </div>
                                                     ))
@@ -132,22 +130,22 @@ const Demo = () => {
                                 <div className="flex flex-col w-full">
                                     {/* About me */}
                                     {
-                                        personalDetails?.CareerObjective &&
+                                        user?.personalDetails?.CareerObjective &&
                                         <div className="py-3">
                                             <h2 className="text-lg font-poppins font-bold text-top-color">About Me</h2>
                                             <div className="border-2 w-20 border-top-color my-3" />
-                                            <p>{personalDetails?.CareerObjective}</p>
+                                            <p>{user?.personalDetails?.CareerObjective}</p>
                                         </div>
                                     }
                                     {/* Professional Experience */}
                                     {
-                                        expirienceDetails &&
+                                        user?.expirienceDetails &&
                                         <div className="py-3">
                                             <h2 className="text-lg font-poppins font-bold text-top-color">Professional Experience</h2>
                                             <div className="border-2 w-20 border-top-color my-3" />
                                             <div className="flex flex-col">
                                                 {
-                                                    expirienceDetails?.experienceArray.map((data, i) => (
+                                                    user?.expirienceDetails?.experienceArray.map((data, i) => (
 
                                                         <div key={i} className="flex flex-col">
                                                             <p className="text-lg font-bold text-gray-700">{data.Company} | {data.Profile}</p>
@@ -162,12 +160,12 @@ const Demo = () => {
                                     }
                                     {/* Projects */}
                                     {
-                                        projectDetails &&
+                                        user?.projectDetails &&
                                         <div className="py-3">
                                             <h2 className="text-lg font-poppins font-bold text-top-color">Projects</h2>
                                             <div className="border-2 w-20 border-top-color my-3" />
                                             <div className="flex flex-col">
-                                                {projectDetails?.projectsArray.map((data, i) => (
+                                                {user?.projectDetails?.projectsArray.map((data, i) => (
 
                                                     <div key={i} className="flex flex-col">
                                                         <p className="text-lg font-semibold text-gray-700">{data.Project}</p>
@@ -182,8 +180,9 @@ const Demo = () => {
                             </div>
                         </div>
                     </div>
+                    <button className="w-fit bg-primary px-6 py-2 text-white rounded-sm" onClick={handlePrint}>Print</button>
+
                 </div>
-                <button onClick={handlePrint}>Print</button>
             </>
         )
 }
