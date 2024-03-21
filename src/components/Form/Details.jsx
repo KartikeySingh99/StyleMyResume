@@ -68,11 +68,11 @@ const Details = ({ actionType }) => {
             setProjectDetails(user?.projectDetails?.projectsArray);
         }
         else if (actionType === "create") {
-            setPersonalDetails({ Name: "", Email: "", PhoneNumber: "", Address: "", Designation: "", CareerObjective: "" });
+            setPersonalDetails({ Name: "", Email: "", PhoneNumber: "", Address: "", Designation: "", CareerObjective: "", Linkedin: "", Github: "" });
             setEducationDetails([{ Course: "", InstituteName: "", Year: "", Marks: "" }])
             setExperienceDetails([{ Company: "", Profile: "", From: "", To: '', Responsibilities: "" }])
-            setProjectDetails([{ Project: "", Description: "", Link: "" }])
-            setSkillDetails([{ Skill: "" }])
+            setProjectDetails([{ Project: "", Description: "", Link: "", Year: "" }])
+            setSkillDetails([{ Skill: "", skillType: "" }])
         }
     }, [actionType, user])
 
@@ -107,7 +107,17 @@ const Details = ({ actionType }) => {
             name: "CareerObjective",
             placeholder: "Enter Your Carrer Objective",
             type: "text"
-        }
+        },
+        {
+            name: "LinkedIn",
+            placeholder: "Paste Your LinkedIn Account Link",
+            type: "text"
+        },
+        {
+            name: "Github",
+            placeholder: "Paste Your Github Account Link",
+            type: "text"
+        },
     ];
 
     const educationDetailsFields = [
@@ -138,7 +148,12 @@ const Details = ({ actionType }) => {
             name: "Skill",
             type: "text",
             placeholder: "Enter Your Skill"
-        }
+        },
+        {
+            name: "skillType",
+            type: "select",
+            placeholder: "e.g Frontend Tools"
+        },
     ]
 
     const projectFields = [
@@ -155,7 +170,11 @@ const Details = ({ actionType }) => {
         {
             name: "Link",
             type: "text"
-        }
+        },
+        {
+            name: "Year",
+            type: "text"
+        },
     ];
 
     const experienceFields = [
@@ -250,6 +269,7 @@ const Details = ({ actionType }) => {
         })
         if (!isEmpty) {
             setDetailedData((prev) => ({ ...prev, projectDetails: data }))
+            handleAllDetails(detailedData)
             navigate("/profile");
         }
         // dispatch(saveData(detailedData))
@@ -264,14 +284,6 @@ const Details = ({ actionType }) => {
         }
     }
 
-    // console.log(user);
-
-    // console.log(personalDetails);
-
-    // console.log(personalDetails);
-    // console.log(educationalDetails);
-    // console.log(skillDetails);
-    // console.log(expirienceDetails);
 
     return (
         loading ?
@@ -300,8 +312,12 @@ const Details = ({ actionType }) => {
                                     PhoneNumber: personalDetails && personalDetails.PhoneNumber,
                                     Address: personalDetails && personalDetails.Address,
                                     Designation: personalDetails && personalDetails.Designation,
-                                    CareerObjective: personalDetails && personalDetails.CareerObjective
+                                    CareerObjective: personalDetails && personalDetails.CareerObjective,
+                                    Linkedin: personalDetails && personalDetails.Linkedin,
+                                    Github: personalDetails && personalDetails.Github
                                 }}
+                                value={value}
+                                setValue={setValue}
                                 onSubmit={handlePersonalData}
                             />
                         </CustomTabPanel>
@@ -351,7 +367,7 @@ const Details = ({ actionType }) => {
                                 onSubmit={handleProjectData}
                                 value={value}
                                 setValue={setValue} />
-                            <button onClick={() => handleAllDetails(detailedData)}>Save</button>
+                            {/*<button onClick={() => handleAllDetails(detailedData)}>Save</button>*/}
                         </CustomTabPanel>
                     </div>
                 </div>

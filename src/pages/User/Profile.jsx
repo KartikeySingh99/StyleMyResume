@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import EditIcon from '@mui/icons-material/Edit';
 import CloseIcon from '@mui/icons-material/Close';
 import EditField from "../../components/User/EditField";
+import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 
 const Profile = () => {
     const dispatch = useDispatch();
@@ -67,6 +68,10 @@ const Profile = () => {
     //         )
     //     }
     // }
+
+    console.log(projecData);
+
+    const key="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";
 
     return (
         <>
@@ -138,6 +143,25 @@ const Profile = () => {
                                                         <div className="text-gray-700">
                                                             <p className="font-bold">{data.Year}</p>
                                                             <p>{data.Marks}%</p>
+                                                        </div>
+                                                    </div>
+                                                    <p className="mt-2">
+                                                        {data.Responsibilities}
+                                                    </p>
+                                                </div>
+                                            ))
+                                        }
+                                        <h2 className="text-xl font-bold mt-6 mb-4">Projects</h2>
+                                        {
+                                            projecData && projecData.map((data, i) => (
+                                                <div key={i} className="mb-6">
+                                                    <div className="flex justify-between flex-wrap gap-2 w-full">
+                                                        <div>
+                                                            <p className="text-gray-700 font-bold" > <span> {data.Project}</span> <span> <a href={data.Link} target="_"><OpenInNewIcon fontSize="medium" /></a></span></p>
+                                                            <p className="text-gray-700 mr-2">{data?.Description}</p>
+                                                        </div>
+                                                        <div className="text-gray-700">
+                                                            <p className="font-bold">{data.Year}</p>
                                                         </div>
                                                     </div>
                                                     <p className="mt-2">

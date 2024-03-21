@@ -7,7 +7,7 @@ import { useForm, Controller, useFieldArray } from "react-hook-form";
 import PropTypes from "prop-types";
 import { useState } from 'react';
 import AddIcon from '@mui/icons-material/Add';
-import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { Tooltip } from '@mui/material';
 
 const Form = ({ sectionName, label, defaultValues = {}, formFields, dynamicFields, onSubmit, setValue, value }) => {
@@ -24,12 +24,12 @@ const Form = ({ sectionName, label, defaultValues = {}, formFields, dynamicField
     return (
         <>
             <div className='w-full h-full'>
-                <div className='w-full flex items-center justify-between'>
+                <div className='w-full flex items-center justify-between mb-4'>
                     <h1 className='text-lg font-semibold'>{sectionName}</h1>
                     {
                         label === "educationDetails" || label === "skills" || label === "projects" || label === "experience" ?
                             <div className='hover:cursor-pointer' onClick={() => append()}>
-                                <Tooltip title="Add More" placement='left' arrow>
+                                <Tooltip title="Add More" placement='right' arrow>
                                     <AddIcon fontSize='medium' />
                                 </Tooltip>
                             </div>
@@ -40,8 +40,8 @@ const Form = ({ sectionName, label, defaultValues = {}, formFields, dynamicField
                     {
                         fields.map((item, i) => (
 
-                            <div key={item.id} className='w-full flex items-start justify-center gap-x-2'>
-                                < Accordion key={item.id} className='w-full' expanded={expanded === i} onChange={handleChange(i)} >
+                            <div key={item.id} className='w-full flex items-start justify-center gap-x-4'>
+                                < Accordion key={item.id} className='w-full my-1' expanded={expanded === i} onChange={handleChange(i)} >
                                     <AccordionSummary
                                         expandIcon={<ExpandMoreIcon />}
                                         aria-controls="panel1a-content"
@@ -60,14 +60,16 @@ const Form = ({ sectionName, label, defaultValues = {}, formFields, dynamicField
                                                         key={j}
                                                         name={`${label}Array[${i}].${item.name}`}
                                                         control={control}
-                                                        render={({ field }) => <TextField type={item.type} {...field} name={item.name} label={item.name} placeholder={item.placeholder} variant="outlined" margin='dense' />}
+                                                        render={({ field }) => <TextField type={item.type} {...field} className='self-start' name={item.name} label={item.name} placeholder={item.placeholder} variant="outlined" margin='dense' />}
                                                     />
                                                 ))
                                             }
                                         </div>
                                     </AccordionDetails>
                                 </Accordion>
-                                <button className='text-red-500' onClick={() => remove(item.id)}><RemoveCircleIcon fontSize='medium' /></button>
+                                <Tooltip title="Remove This Field" placement='right' arrow>
+                                    <button className='text-red-500' type='button' onClick={() => remove(item.id)}><DeleteIcon fontSize='medium' /></button>
+                                </Tooltip>
 
                             </div>
                         ))
@@ -88,13 +90,13 @@ const Form = ({ sectionName, label, defaultValues = {}, formFields, dynamicField
                     <div className='flex items-center justify-center gap-x-4  mt-6'>
                         {
                             value > 0 &&
-                            <button className='bg-zinc-400 text-white font-semibold hover:outline outline-zinc-400 transition-all duration-150 ease-in-out py-2 px-4 rounded-lg' onClick={() => { setValue(value - 1) }}>Back</button>
+                            <button type='button' className='bg-zinc-400 text-white font-semibold hover:outline outline-zinc-400 transition-all duration-150 ease-in-out py-2 px-4 rounded-lg' onClick={() => { setValue(value - 1) }}>Back</button>
                         }
 
-                        <button type='submit' className='bg-amber-400 text-white font-semibold hover:outline outline-amber-400 transition-all duration-150 ease-in-out py-2 px-4 rounded-lg'>Submit</button>
+                        {/* <button type='submit' className='bg-amber-400 text-white font-semibold hover:outline outline-amber-400 transition-all duration-150 ease-in-out py-2 px-4 rounded-lg'>Submit</button> */}
                         {
-                            value < 4 &&
-                            <button type='button' className='bg-primary text-white font-semibold hover:outline outline-primary transition-all duration-150 ease-in-out py-2 px-4 rounded-lg' onClick={() => { setValue(value + 1) }}>Next </button>
+                            value <= 4 &&
+                            <button type='submit' className='bg-primary text-white font-semibold hover:outline outline-primary transition-all duration-150 ease-in-out py-2 px-4 rounded-lg'>{value < 4 ? 'Next' : 'Submit'}</button>
                         }
                     </div>
                 </form>
