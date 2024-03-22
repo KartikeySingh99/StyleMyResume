@@ -8,7 +8,6 @@ import Form from './Form';
 import Loader from "../Loader/Loader";
 import { useNavigate } from 'react-router-dom';
 
-
 function CustomTabPanel(props) {
 
     const { children, value, index, ...other } = props;
@@ -290,8 +289,8 @@ const Details = ({ actionType }) => {
             <Loader />
             :
             <>
-                <div className='mt-24 w-full flex items-center justify-center'>
-                    <div className="w-full lg:max-w-[50vw]  min-h-[70vh] border shadow-xl rounded-lg">
+                <div className='mt-12 w-full flex items-center justify-center'>
+                    <div className="w-full md:w-[80%] lg:w-[70%] xl:w-[50%] border shadow-xl rounded-lg">
                         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
                             <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
                                 <Tab label="Contact Details" />

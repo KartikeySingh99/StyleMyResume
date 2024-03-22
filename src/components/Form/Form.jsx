@@ -5,21 +5,55 @@ import AccordionDetails from '@mui/material/AccordionDetails';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { useForm, Controller, useFieldArray } from "react-hook-form";
 import PropTypes from "prop-types";
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { Tooltip } from '@mui/material';
+import SwapVertIcon from '@mui/icons-material/SwapVert';
 
 const Form = ({ sectionName, label, defaultValues = {}, formFields, dynamicFields, onSubmit, setValue, value }) => {
 
     const { control, handleSubmit } = useForm({ defaultValues })
-    const { fields, append, remove } = useFieldArray({ control, name: `${label}Array` })
+    const { fields, append, remove, swap } = useFieldArray({ control, name: `${label}Array` })
 
     const [expanded, setExpanded] = useState(0)
+
+    const fieldRef = useRef([]);
 
     const handleChange = (panel) => (event, newExpanded) => {
         setExpanded(newExpanded ? panel : false);
     }
+
+    const handleFieldReorder = (dragIndex, dropIndex) => {
+        swap(dragIndex, dropIndex);
+    };
+
+    const handleDragStart = (e, index) => {
+        e.dataTransfer.setData('index', index.toString());
+    };
+
+    // Function to handle drag over
+    const handleDragOver = (e) => {
+        e.preventDefault();
+    };
+
+    // Function to handle drop
+    const handleDrop = (e, dropIndex) => {
+        const dragIndex = parseInt(e.dataTransfer.getData('index'));
+        handleFieldReorder(dragIndex, dropIndex);
+    };
+
+    const handleReposition = (index) => {
+        const nextindex = fieldRef.current.findIndex((item, i) => i > index && item === fieldRef.current[index + 1]);
+        const prevIndex = fieldRef.current.findIndex((item, i) => i > index && item === fieldRef.current[index - 1]);
+        if (index !== -1 && fieldRef.current[index + 1]) {
+            swap(index, nextindex)
+        }
+        // if (index === fields.length - 1 && !fieldRef.current[index + 1]) {
+        //     swap(index, prevIndex)
+        // }
+    }
+
 
     return (
         <>
@@ -40,8 +74,19 @@ const Form = ({ sectionName, label, defaultValues = {}, formFields, dynamicField
                     {
                         fields.map((item, i) => (
 
-                            <div key={item.id} className='w-full flex items-start justify-center gap-x-4'>
-                                < Accordion key={item.id} className='w-full my-1' expanded={expanded === i} onChange={handleChange(i)} >
+                            <div
+                                key={item.id}
+                                className='w-full flex items-start justify-center gap-x-4'
+                                draggable
+                                onDragStart={(e) => handleDragStart(e, i)}
+                                onDragOver={handleDragOver}
+                                onDrop={(e) => handleDrop(e, i)}
+                            >
+                                <Tooltip title={`Swap Position`} placement='left' arrow >
+                                    <button type='button' onClick={() => handleReposition(i)}><SwapVertIcon fontSize='medium' /></button>
+                                </Tooltip>
+
+                                < Accordion key={item.id} ref={input => fieldRef.current[i] = input} className='w-full my-1' expanded={expanded === i} onChange={handleChange(i)} >
                                     <AccordionSummary
                                         expandIcon={<ExpandMoreIcon />}
                                         aria-controls="panel1a-content"
@@ -70,11 +115,10 @@ const Form = ({ sectionName, label, defaultValues = {}, formFields, dynamicField
                                 <Tooltip title="Remove This Field" placement='right' arrow>
                                     <button className='text-red-500' type='button' onClick={() => remove(item.id)}><DeleteIcon fontSize='medium' /></button>
                                 </Tooltip>
-
                             </div>
                         ))
                     }
-                    <div className='flex my-4 gap-y-2 gap-x-4 lg:gap-y-4 justify-center flex-col lg:flex-row flex-wrap'>
+                    <div className='flex my-4 gap-y-2 gap-x-4 lg:gap-y-4 justify-center flex-col md:flex-row flex-wrap'>
 
                         {
                             formFields && formFields.map((fields, j) => (
