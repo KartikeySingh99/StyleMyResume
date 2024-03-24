@@ -41,22 +41,22 @@ const Header = () => {
         },
     ]
 
-    // const handleScroll = () => {
-    //     if(window.scrollY >=100){
-    //         setBackgroundColor('bg-primary')
-    //     }
-    //     else{
-    //         setBackgroundColor('bg-none')
-    //     }
-    // }
+    const handleScroll = () => {
+        if(window.scrollY >=100){
+            setBackgroundColor('bg-primary')
+        }
+        else{
+            setBackgroundColor('bg-none')
+        }
+    }
 
-    // useEffect(() => {
-    //     window.addEventListener('scroll', handleScroll);
-    // }, [])
+    useEffect(() => {
+        window.addEventListener('scroll', handleScroll);
+    }, [])
 
     return (
         <>
-            <header className={`fixed top-0 z-20 w-full bg-primary`}>
+            <header className={`fixed top-0 z-20 w-full bg-primary/70 backdrop-blur-lg shadow-md`}>
                 <nav className='flex items-center justify-around'>
                     <Link to="/" ><h1 className='text-white text-2xl lg:text-4xl font-extrabold font-heading'>StyleMyResume</h1></Link>
                     <ul className="hidden font-semibold lg:flex items-center justify-around text-white text-lg">

@@ -1,4 +1,3 @@
-import AliceCarousel from 'react-alice-carousel';
 import 'react-alice-carousel/lib/alice-carousel.css';
 import ReviewsCards from './ReviewsCards';
 import { Swiper, SwiperSlide } from 'swiper/react';
@@ -7,13 +6,6 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import { Navigation, Autoplay } from 'swiper/modules';
-
-const responsive = {
-    0: { items: 1 },
-    425: { items: 1 },
-    768: { items: 2 },
-    1024: { items: 3 },
-};
 
 const data = [
     {
@@ -67,7 +59,7 @@ const Carousel = () => {
                 disableOnInteraction: false,
             }}
             grabCursor={true}
-            navigation={true}
+            // navigation={true}
             modules={[Navigation, Autoplay]}
             slidesPerView={3}
             spaceBetween={30}

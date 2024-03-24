@@ -27,16 +27,14 @@ const Template = () => {
 
     return (
         <>
-            {/* {
-                templateData.map((data, i) => ( */}
-            <div className="template group relative border w-[290px] h-[410px] flex items-center justify-center">
+            
+            <div className="template group relative border w-[290px] h-[410px] scale-125 flex items-center justify-center">
                 <div className="">
                     <img src={Template5} alt="" />
                 </div>
                 <button className="absolute z-10 text-md font-bold px-6 py-2 rounded-xl bg-primary text-white" onClick={() => navigate('/template1')}>Use This Template</button>
             </div>
-            {/* ))
-            } */}
+           
         </>
     );
 };
