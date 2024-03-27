@@ -42,7 +42,7 @@ export class AuthService {
             return await this.account.get();
         }
         catch (error) {
-            console.log("no user found!");
+            return "no user found!";
         }
     }
 

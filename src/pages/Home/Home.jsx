@@ -16,6 +16,7 @@ const Home = () => {
     const navigate = useNavigate();
 
     const { isAuthenticated, userData } = useSelector((state) => state.authStatus);
+
     const { user } = useSelector((state) => state.user);
 
     useEffect(() => {
@@ -34,7 +35,7 @@ const Home = () => {
                             <h1 className="text-4xl font-extrabold">Lets Get You Hired</h1>
                             <p className="text-xl font-semibold">Create Professional Job Ready Resume In Minutes With StyleYourResume!</p>
                             {
-                                user !== null ?
+                                userData ?
                                     <button className="hover:shadow-lg transition-transform duration-150 ease-linear bg-amber-500 px-12 py-4 rounded-full text-xl font-bold" onClick={() => navigate('/profile')}>View Profile</button>
                                     :
                                     <button className="hover:shadow-lg transition-transform duration-150 ease-linear bg-amber-500 px-12 py-4 rounded-full text-xl font-bold" onClick={() => navigate('/details')}>Create Now</button>

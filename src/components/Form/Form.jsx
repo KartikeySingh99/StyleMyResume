@@ -13,14 +13,18 @@ import SwapVertIcon from '@mui/icons-material/SwapVert';
 
 const Form = ({ sectionName, label, defaultValues = {}, formFields, dynamicFields, onSubmit, setValue, value }) => {
 
+    const fieldRef = useRef([]);
+
     const { control, handleSubmit } = useForm({ defaultValues })
     const { fields, append, remove, swap } = useFieldArray({ control, name: `${label}Array` })
 
     const [expanded, setExpanded] = useState(0)
+    const [isFocused, setIsFocused] = useState(false);
 
-    const fieldRef = useRef([]);
+
 
     const handleChange = (panel) => (event, newExpanded) => {
+        console.log(panel);
         setExpanded(newExpanded ? panel : false);
     }
 
@@ -55,6 +59,17 @@ const Form = ({ sectionName, label, defaultValues = {}, formFields, dynamicField
     }
 
 
+    const handleFocus = () => {
+        setIsFocused(true);
+    };
+
+    const handleBlur = () => {
+        console.log("called");
+        setIsFocused(false);
+    };
+
+    console.log("isFocused:", isFocused);
+
     return (
         <>
             <div className='w-full h-full'>
@@ -72,10 +87,10 @@ const Form = ({ sectionName, label, defaultValues = {}, formFields, dynamicField
                 </div>
                 <form className='text-center' onSubmit={handleSubmit(onSubmit)}>
                     {
-                        fields.map((item, i) => (
+                        fields.map((fieldData, i) => (
 
                             <div
-                                key={item.id}
+                                key={fieldData.id}
                                 className='w-full flex items-start justify-center gap-x-4'
                                 draggable
                                 onDragStart={(e) => handleDragStart(e, i)}
@@ -86,7 +101,7 @@ const Form = ({ sectionName, label, defaultValues = {}, formFields, dynamicField
                                     <button type='button' onClick={() => handleReposition(i)}><SwapVertIcon fontSize='medium' /></button>
                                 </Tooltip>
 
-                                < Accordion key={item.id} ref={input => fieldRef.current[i] = input} className='w-full my-1' expanded={expanded === i} onChange={handleChange(i)} >
+                                < Accordion ref={input => fieldRef.current[i] = input} className='w-full my-1' expanded={expanded === i} onChange={handleChange(i)} >
                                     <AccordionSummary
                                         expandIcon={<ExpandMoreIcon />}
                                         aria-controls="panel1a-content"
@@ -105,7 +120,14 @@ const Form = ({ sectionName, label, defaultValues = {}, formFields, dynamicField
                                                         key={j}
                                                         name={`${label}Array[${i}].${item.name}`}
                                                         control={control}
-                                                        render={({ field }) => <TextField type={item.type} {...field} className='self-start' name={item.name} label={item.name} placeholder={item.placeholder} variant="outlined" margin='dense' />}
+                                                        render={({ field }) => item.name === "Responsibilities" || item.name === "Description" ?
+                                                            <div className='relative group'>
+                                                                <textarea className={'px-3 py-4 border border-gray-200 rounded-md hover:border-black' + `${isFocused ? 'outline outline-primary border-primary' : ""}`} placeholder={item.placeholder} onFocus={handleFocus} onBlurCapture={handleBlur} name={item.name} {...field} id="responsibility" cols="40" rows="2" />
+                                                                <label htmlFor="responsibility"
+                                                                    className={'absolute bg-white px-3 text-sm text-primary -top-3 left-2 ' + `${isFocused?'text-primary':'text-gray-500'}`}
+                                                                >Description</label>
+                                                            </div> :
+                                                            <TextField type={item.type} {...field} className='self-start' name={item.name} label={item.name} placeholder={item.placeholder} variant="outlined" margin='dense' />}
                                                     />
                                                 ))
                                             }
@@ -113,7 +135,7 @@ const Form = ({ sectionName, label, defaultValues = {}, formFields, dynamicField
                                     </AccordionDetails>
                                 </Accordion>
                                 <Tooltip title="Remove This Field" placement='right' arrow>
-                                    <button className='text-red-500' type='button' onClick={() => remove(item.id)}><DeleteIcon fontSize='medium' /></button>
+                                    <button className='text-red-500' type='button' onClick={() => remove(i)}><DeleteIcon fontSize='medium' /></button>
                                 </Tooltip>
                             </div>
                         ))

@@ -32,36 +32,37 @@ function App() {
   // console.log(user);
 
   useEffect(() => {
-    // const fetchData = async () => {
-    //   try {
-    //     const data = await authService.getCurrentUser();
-    //     if (data) {
-    //       console.log(data);
-    //       dispatch(login(data));
-    //       dispatch(getUser(data));
-    //       dispatch(fetchUserData(data.$id));
-    //     } else {
-    //       dispatch(logout());
-    //     }
-    //   } catch (err) {
-    //     console.error(err);
-    //   }
-    // };
-
-    // fetchData();
-    authService.getCurrentUser()
-      .then((data) => {
+    const fetchData = async () => {
+      console.log("app call");
+      try {
+        const data = await authService.getCurrentUser();
         if (data) {
-          // console.log("userData App.js=>",data);
-          dispatch(getUser(data))
-          dispatch(login(data))
-          dispatch(fetchUserData(data))
+          console.log(data);
+          dispatch(getUser(data));
+          dispatch(login(data));
+          dispatch(fetchUserData(data));
+        } else {
+          dispatch(logout());
         }
-        else {
-          dispatch(logout())
-        }
-      })
-      .catch((err) => console.log(err))
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    fetchData();
+    // authService.getCurrentUser()
+    //   .then((data) => {
+    //     if (data) {
+    //       // console.log("userData App.js=>",data);
+    //       dispatch(getUser(data))
+    //       dispatch(login(data))
+    //       dispatch(fetchUserData(data))
+    //     }
+    //     else {
+    //       dispatch(logout())
+    //     }
+    //   })
+    //   .catch((err) => console.log(err))
   }, [dispatch])
 
   return (

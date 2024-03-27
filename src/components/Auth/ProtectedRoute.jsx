@@ -5,9 +5,12 @@ import PropTypes from "prop-types";
 const ProtectedRoute = ({ children }) => {
 
 
-    const { isAuthenticated, loading } = useSelector((state) => state.authStatus);
+    const { isAuthenticated, loading, userData } = useSelector((state) => state.authStatus);
 
-    if (!isAuthenticated && !loading) {
+    // console.log(isAuthenticated);
+    // console.log(userData);
+
+    if (!isAuthenticated && !userData) {
         return <Navigate to="/login" />
     }
 

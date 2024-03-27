@@ -162,17 +162,17 @@ const Details = ({ actionType }) => {
             placeholder: "Enter Project Name"
         },
         {
-            name: "Description",
-            type: "text",
-            placeholder: "Enter Project Description"
-        },
-        {
             name: "Link",
             type: "text"
         },
         {
             name: "Year",
             type: "text"
+        },
+        {
+            name: "Description",
+            type: "text",
+            placeholder: "Enter Project Description"
         },
     ];
 
@@ -268,8 +268,7 @@ const Details = ({ actionType }) => {
         })
         if (!isEmpty) {
             setDetailedData((prev) => ({ ...prev, projectDetails: data }))
-            handleAllDetails(detailedData)
-            navigate("/profile");
+            handleAllDetails({ ...detailedData, projectDetails: data })
         }
         // dispatch(saveData(detailedData))
     }
@@ -280,9 +279,10 @@ const Details = ({ actionType }) => {
         }
         else if (actionType === "edit") {
             dispatch(editData({ userID: userData?.$id, userData: data }));
+            navigate("/profile");
         }
     }
-
+    
 
     return (
         loading ?
@@ -312,7 +312,7 @@ const Details = ({ actionType }) => {
                                     Address: personalDetails && personalDetails.Address,
                                     Designation: personalDetails && personalDetails.Designation,
                                     CareerObjective: personalDetails && personalDetails.CareerObjective,
-                                    Linkedin: personalDetails && personalDetails.Linkedin,
+                                    LinkedIn: personalDetails && personalDetails.LinkedIn,
                                     Github: personalDetails && personalDetails.Github
                                 }}
                                 value={value}

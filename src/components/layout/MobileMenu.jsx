@@ -40,7 +40,7 @@ const MobileMenu = ({ openMenu, setOpenMenu, logout }) => {
                 </li>
                 {
                     isAuthenticated ?
-                        <li className='hover:cursor-pointer hover:bg-gray-100 py-3 px-4' onClick={logout}>
+                        <li className='hover:cursor-pointer hover:bg-gray-100 py-3 px-4' onClick={() => { setOpenMenu(false); logout() }}>
                             <p className='text-md font-semibold'>Logout</p>
                         </li>
                         :
