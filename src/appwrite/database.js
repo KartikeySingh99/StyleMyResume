@@ -1,5 +1,5 @@
 import config from "../config/config";
-import { Client, Databases, ID } from "appwrite";
+import { Client, Databases, ID, Permission, Role } from "appwrite";
 
 
 export class Service {
@@ -34,7 +34,11 @@ export class Service {
                 expirienceDetails: JSON.stringify(expirienceDetails),
                 skillDetails: JSON.stringify(skillDetails),
                 projectDetails: JSON.stringify(projectDetails)
-            })
+            }, [
+                Permission.read(Role.user(User_ID)),
+                Permission.update(Role.user(User_ID)),
+                Permission.delete(Role.user(User_ID)),
+            ])
             if (data) {
                 return data;
             }
@@ -50,12 +54,13 @@ export class Service {
             if (data) {
                 return data;
             }
-            else{
+            else {
                 return "No Data Available!";
             }
         }
         catch (error) {
-            throw error;
+            console.log(error.response.message);
+            return { error: "No data Found!", code: error.code };
         }
     }
 

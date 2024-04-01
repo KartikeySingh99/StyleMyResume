@@ -276,6 +276,7 @@ const Details = ({ actionType }) => {
     const handleAllDetails = (data) => {
         if (actionType === "create") {
             dispatch(saveData({ userID: userData?.$id, data }));
+            navigate("/profile");
         }
         else if (actionType === "edit") {
             dispatch(editData({ userID: userData?.$id, userData: data }));

@@ -32,42 +32,42 @@ function App() {
   // console.log(user);
 
   useEffect(() => {
-    const fetchData = async () => {
-      console.log("app call");
-      try {
-        const data = await authService.getCurrentUser();
-        if (data) {
-          console.log(data);
-          dispatch(getUser(data));
-          dispatch(login(data));
-          dispatch(fetchUserData(data));
-        } else {
-          dispatch(logout());
-        }
-      } catch (err) {
-        console.error(err);
-      }
-    };
-
-    fetchData();
-    // authService.getCurrentUser()
-    //   .then((data) => {
+    // const fetchData = async () => {
+    //   console.log("app call");
+    //   try {
+    //     const data = await authService.getCurrentUser();
     //     if (data) {
-    //       // console.log("userData App.js=>",data);
-    //       dispatch(getUser(data))
-    //       dispatch(login(data))
-    //       dispatch(fetchUserData(data))
+    //       console.log(data);
+    //       dispatch(getUser(data));
+    //       dispatch(login(data));
+    //       dispatch(fetchUserData(data));
+    //     } else {
+    //       dispatch(logout());
     //     }
-    //     else {
-    //       dispatch(logout())
-    //     }
-    //   })
-    //   .catch((err) => console.log(err))
+    //   } catch (err) {
+    //     console.error(err);
+    //   }
+    // };
+
+    // fetchData();
+    authService.getCurrentUser()
+      .then((data) => {
+        if (data.error) {
+          console.log(data);
+          dispatch(logout())
+        }
+        else {
+          console.log("userData App.js=>", data);
+          dispatch(getUser(data)) //* passing current user data
+          dispatch(login(data))
+          dispatch(fetchUserData(data))
+        }
+      })
+      .catch((err) => console.log(err))
   }, [dispatch])
 
   return (
     <>
-      <Header />
       <ToastContainer
         position="top-center"
         autoClose={2000}
@@ -77,6 +77,7 @@ function App() {
         draggable
         theme="light"
       />
+      <Header />
       <Routes>
         <Route path='/' element={<Home />} />
         <Route exact path='/template' element={
@@ -86,7 +87,7 @@ function App() {
         } />
         <Route exact path='/template1' element={
           <ProtectedRoute>
-            <Demo/>
+            <Demo />
           </ProtectedRoute>
         } />
         <Route path='/profile' element={

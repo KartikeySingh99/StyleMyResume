@@ -11,20 +11,26 @@ import { toast } from "react-toastify";
 export const Login = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
-    const { isAuthenticated } = useSelector((state) => state.authStatus);
+
+    const { isAuthenticated, error } = useSelector((state) => state.authStatus);
 
     useEffect(() => {
+        if (error) {
+            toast.error(error, { autoClose: 2000,position:'bottom-right' })
+        }
         if (isAuthenticated) {
-            // dispatch(fetchUserData());
             navigate('/');
         }
-    }, [isAuthenticated])
+    }, [isAuthenticated, error])
 
     const handleFormData = (data) => {
         const { email, password } = data;
         authService.login({ email, password })
-            .then((data) => { dispatch(LoginAction(data)); dispatch(fetchUserData(data.userId)) })
-            .catch((err) => toast.error(err.message, { autoClose: 1000, position: 'top-right' }))
+            .then((data) => {
+                dispatch(LoginAction(data));
+                dispatch(fetchUserData(data));
+            })
+            .catch((err) => toast.error(err.message + "error wala", { autoClose: 1000, position: 'bottom' }))
     }
 
     return (

@@ -33,7 +33,7 @@ export class AuthService {
             return await this.account.createEmailSession(email, password);
         }
         catch (error) {
-            throw error;
+            return { error: error.response.message, code: error.code };
         }
     }
 
@@ -42,13 +42,13 @@ export class AuthService {
             return await this.account.get();
         }
         catch (error) {
-            return "no user found!";
+            return { error: "User Not Logged In!", code: error.code };
         }
     }
 
     async logout() {
         try {
-            this.account.deleteSessions();
+            return this.account.deleteSessions();
         }
         catch (error) {
             console.log("Logout Error", error);

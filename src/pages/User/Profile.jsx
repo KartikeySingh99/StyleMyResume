@@ -2,12 +2,10 @@ import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux"
 import { fetchUserData } from "../../slices/userSlice";
 import { useNavigate } from "react-router-dom";
-import EditIcon from '@mui/icons-material/Edit';
-import CloseIcon from '@mui/icons-material/Close';
-import EditField from "../../components/User/EditField";
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import LinkedInIcon from '@mui/icons-material/LinkedIn';
 import GitHubIcon from '@mui/icons-material/GitHub';
+import EmailIcon from '@mui/icons-material/Email';
 import Loader from "../../components/Loader/Loader"
 import useMakeURLShort from "../../hooks/useMakeURLShort";
 
@@ -124,11 +122,15 @@ const Profile = () => {
                                                 <ul>
                                                     <li className="my-2 text-base hover:cursor-pointer">
                                                         <span className=" mr-1"><LinkedInIcon fontSize="medium" /></span>
-                                                        <span className="text-blue-500"><a href={personalData?.LinkedIn} target="_">{returnUserNameFromURL(personalData?.LinkedIn)}</a></span>
+                                                        <span className="text-blue-500">{personalData?.LinkedIn ? <a href={personalData?.LinkedIn} target="_">{returnUserNameFromURL(personalData?.LinkedIn)}</a> : "Add LinkedIn Link"}</span>
                                                     </li>
                                                     <li className="my-2 text-base hover:cursor-pointer">
                                                         <span className=" mr-1"><GitHubIcon fontSize="medium" /></span>
-                                                        <span className="text-blue-500"><a href={personalData?.Github} target="_">{returnUserNameFromURL(personalData?.Github)}</a></span>
+                                                        <span className="text-blue-500">{personalData?.Github ? <a href={personalData?.Github} target="_">{returnUserNameFromURL(personalData?.Github)}</a> : "Add Github Link"}</span>
+                                                    </li>
+                                                    <li className="my-2 text-base hover:cursor-pointer">
+                                                        <span className=" mr-1"><EmailIcon fontSize="medium" /></span>
+                                                        <span className="text-blue-500">{personalData?.Email ? personalData?.Email : "Add Email Account"}</span>
                                                     </li>
                                                 </ul>
                                             </div>

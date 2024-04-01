@@ -8,6 +8,7 @@ import { fetchUserData } from '../../slices/userSlice';
 import hero_img from "/Resume-amico.svg"
 import "./home.css"
 import { useEffect } from "react";
+import { toast } from "react-toastify";
 
 
 const Home = () => {
@@ -15,17 +16,21 @@ const Home = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
-    const { isAuthenticated, userData } = useSelector((state) => state.authStatus);
-
+    const { isAuthenticated, error } = useSelector((state) => state.authStatus);
     const { user } = useSelector((state) => state.user);
 
     useEffect(() => {
-        dispatch(fetchUserData(userData))
-    }, [dispatch, userData])
+        if (error) {
+            console.log(error);
+            toast.warn(error, { autoClose: 1000 });
+        }
+        // if (Object.entries(userData).length > 0) {
+        //     console.log("home page fetch chla");
+        //     dispatch(fetchUserData(userData))
+        // }
+    }, [dispatch, error])
 
-    // console.log(userData);
-    // console.log(user);
-
+    console.log(user);
     return (
         <>
             <div id="hero-section" className="w-full h-screen px-6 py-3">
@@ -35,7 +40,7 @@ const Home = () => {
                             <h1 className="text-4xl font-extrabold">Lets Get You Hired</h1>
                             <p className="text-xl font-semibold">Create Professional Job Ready Resume In Minutes With StyleYourResume!</p>
                             {
-                                userData ?
+                                isAuthenticated && Object.entries(user).length > 0 ?
                                     <button className="hover:shadow-lg transition-transform duration-150 ease-linear bg-amber-500 px-12 py-4 rounded-full text-xl font-bold" onClick={() => navigate('/profile')}>View Profile</button>
                                     :
                                     <button className="hover:shadow-lg transition-transform duration-150 ease-linear bg-amber-500 px-12 py-4 rounded-full text-xl font-bold" onClick={() => navigate('/details')}>Create Now</button>

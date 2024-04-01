@@ -6,7 +6,6 @@ export const fetchUserData = createAsyncThunk('getUserDetails', async (userData)
     if ('userId' in userData) {
         let userID = userData.userId;
         const data = await service.getData(userID);
-        // console.log(data);
         if (data) {
             return data;
         }
@@ -18,6 +17,9 @@ export const fetchUserData = createAsyncThunk('getUserDetails', async (userData)
             return data;
         }
     }
+    // else{
+    //     return "No Data Available!"
+    // }
 })
 
 export const editData = createAsyncThunk('editData', async ({ userID, userData }) => {
@@ -33,7 +35,8 @@ export const userSlice = createSlice({
     initialState: {
         user: {},
         loading: false,
-        isUpdated: false
+        isUpdated: false,
+        error: null
     },
     reducers: {
         saveData: (state, action) => {
@@ -51,16 +54,21 @@ export const userSlice = createSlice({
                 state.loading = true;
             })
             .addCase(fetchUserData.fulfilled, (state, action) => {
-                const { personalDetails, educationalDetails, expirienceDetails, skillDetails, projectDetails, ...data } = action.payload;
-                state.user = {
-                    personalDetails: JSON.parse(personalDetails),
-                    educationalDetails: JSON.parse(educationalDetails),
-                    expirienceDetails: JSON.parse(expirienceDetails),
-                    skillDetails: JSON.parse(skillDetails),
-                    projectDetails: JSON.parse(projectDetails),
-                    ...data
-                }
                 state.loading = false;
+                if (action.payload?.code === 404) {
+                    state.error = action.payload.error;
+                }
+                else {
+                    const { personalDetails, educationalDetails, expirienceDetails, skillDetails, projectDetails, ...data } = action.payload;
+                    state.user = {
+                        personalDetails: JSON.parse(personalDetails),
+                        educationalDetails: JSON.parse(educationalDetails),
+                        expirienceDetails: JSON.parse(expirienceDetails),
+                        skillDetails: JSON.parse(skillDetails),
+                        projectDetails: JSON.parse(projectDetails),
+                        ...data
+                    }
+                }
             })
             .addCase(fetchUserData.rejected, (state) => {
                 state.error = "cannot fetch data";
