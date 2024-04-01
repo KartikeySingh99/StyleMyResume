@@ -26,7 +26,7 @@ export const editData = createAsyncThunk('editData', async ({ userID, userData }
     // console.log("Edit Data: ", userData);
     // console.log(userID);
     const data = await service.updateData(userID, { ...userData });
-    // console.log(data);
+    console.log(data);
     return data;
 })
 

@@ -189,13 +189,13 @@ const Details = ({ actionType }) => {
         },
         {
             name: "From",
-            placeholder: "Joining Date",
-            type: "date"
+            placeholder: "ex - dd/mm/yyyy",
+            type: "text"
         },
         {
             name: "To",
-            placeholder: "Last Working Date",
-            type: "date"
+            placeholder: "ex - dd/mm/yyyy or Present",
+            type: "text"
         },
         {
             name: "Responsibilities",
@@ -283,7 +283,7 @@ const Details = ({ actionType }) => {
             navigate("/profile");
         }
     }
-    
+
 
     return (
         loading ?

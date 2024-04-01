@@ -13,7 +13,9 @@ export default {
         logo: "#023E8A"
       },
       fontFamily: {
-        heading: ['Lobster', 'sans-serif']
+        heading: ['Lobster', 'sans-serif'],
+        Oswald:["Oswald", 'sans-serif'],
+        Inter:["Inter", 'sans-serif']
       }
     },
   },

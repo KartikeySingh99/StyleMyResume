@@ -24,7 +24,6 @@ const Form = ({ sectionName, label, defaultValues = {}, formFields, dynamicField
 
 
     const handleChange = (panel) => (event, newExpanded) => {
-        console.log(panel);
         setExpanded(newExpanded ? panel : false);
     }
 
@@ -64,11 +63,9 @@ const Form = ({ sectionName, label, defaultValues = {}, formFields, dynamicField
     };
 
     const handleBlur = () => {
-        console.log("called");
         setIsFocused(false);
     };
 
-    console.log("isFocused:", isFocused);
 
     return (
         <>

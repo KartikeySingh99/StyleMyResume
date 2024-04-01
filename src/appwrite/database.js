@@ -64,7 +64,7 @@ export class Service {
         }
     }
 
-    async updateData(User_ID, {
+    async updateData(userID, {
         personalDetails,
         educationalDetails,
         expirienceDetails,
@@ -72,7 +72,7 @@ export class Service {
         projectDetails
     }) {
         try {
-            await this.databases.updateDocument(config.appWriteDatabaseID, config.appWriteCollectionID, User_ID, {
+            await this.databases.updateDocument(config.appWriteDatabaseID, config.appWriteCollectionID, userID, {
                 personalDetails: JSON.stringify(personalDetails),
                 educationalDetails: JSON.stringify(educationalDetails),
                 expirienceDetails: JSON.stringify(expirienceDetails),
@@ -81,7 +81,7 @@ export class Service {
             })
         }
         catch (error) {
-            console.log(error);
+            return { error: error.response.message, code: error.code }
         }
     }
 
