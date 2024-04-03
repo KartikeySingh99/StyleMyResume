@@ -17,7 +17,7 @@ import { ToastContainer, toast } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
 import TemplatePage from './pages/Templates/TemplatePage';
 import Profile from './pages/User/Profile';
-import Template1 from './pages/Templates/Template1';
+import SuggestionsPage from './pages/SuggestionPage/SuggestionsPage';
 
 function App() {
 
@@ -53,11 +53,11 @@ function App() {
     authService.getCurrentUser()
       .then((data) => {
         if (data.error) {
-          console.log(data);
+          // console.log(data);
           dispatch(logout())
         }
         else {
-          console.log("userData App.js=>", data);
+          // console.log("userData App.js=>", data);
           dispatch(getUser(data)) //* passing current user data
           dispatch(login(data))
           dispatch(fetchUserData(data))
@@ -69,7 +69,7 @@ function App() {
   return (
     <>
       <ToastContainer
-        position="top-center"
+        position="bottom-center"
         autoClose={2000}
         hideProgressBar={false}
         closeOnClick
@@ -93,6 +93,11 @@ function App() {
         <Route path='/profile' element={
           <ProtectedRoute>
             <Profile />
+          </ProtectedRoute>
+        } />
+        <Route path='/generate-suggestions' element={
+          <ProtectedRoute>
+            <SuggestionsPage />
           </ProtectedRoute>
         } />
         <Route path='/details' element={

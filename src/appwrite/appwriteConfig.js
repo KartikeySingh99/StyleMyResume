@@ -17,14 +17,9 @@ export class AuthService {
             const userAccount = await this.account.create(ID.unique(), email, password, name)
             if (userAccount) {
                 return this.login({ email, password });
-                // return userAccount;
-            }
-            else {
-                // throw Error("Failed to Create User");
-                return userAccount;
             }
         } catch (error) {
-            throw error;
+            return { error: error.response.message, code: error.code };
         }
     }
 
@@ -51,7 +46,7 @@ export class AuthService {
             return this.account.deleteSessions();
         }
         catch (error) {
-            console.log("Logout Error", error);
+            return { error: error.response.message, code: error.code }
         }
     }
 }

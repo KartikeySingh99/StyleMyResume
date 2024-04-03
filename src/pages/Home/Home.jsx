@@ -31,6 +31,7 @@ const Home = () => {
     }, [dispatch, error])
 
     console.log(user);
+
     return (
         <>
             <div id="hero-section" className="w-full h-screen px-6 py-3">

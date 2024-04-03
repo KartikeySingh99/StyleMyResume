@@ -21,7 +21,7 @@ export class Service {
         projectDetails }) {
         // eslint-disable-next-line no-useless-catch
         try {
-            console.log(User_ID);
+            console.log(personalDetails);
             // const personalDetails = JSON.stringify(personalDetails);
             // const educationalDetails = JSON.stringify(educationalDetails);
             // const expirienceDetails = JSON.stringify(expirienceDetails);

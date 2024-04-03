@@ -6,7 +6,7 @@ import authService from '../../appwrite/appwriteConfig';
 import { register } from '../../slices/authSlice';
 import { useEffect } from 'react';
 import AuthForm from '../Form/AuthForm';
-
+import { toast } from "react-toastify";
 export const SignUp = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
@@ -15,7 +15,7 @@ export const SignUp = () => {
 
     useEffect(() => {
         if (isCreated) {
-            alert("Account created!");
+            toast.success("Account created!", { autoClose: 1000 });
             navigate('/')
         }
     }, [isCreated])
@@ -23,7 +23,7 @@ export const SignUp = () => {
     const handleFormData = (data) => {
         const { email, password, name } = data;
         authService.createAccount({ email, password, name })
-            .then(() => dispatch(register()))
+            .then((data) => dispatch(register(data)))
             .catch((err) => console.log(err))
     }
     return (

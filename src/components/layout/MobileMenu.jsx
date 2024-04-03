@@ -10,6 +10,44 @@ const MobileMenu = ({ openMenu, setOpenMenu, logout }) => {
 
     const navigate = useNavigate();
 
+    const menuOptions = [
+        {
+            name: "Your Profile",
+            slug: "/profile",
+            isAuthenticated: true
+        },
+        {
+            name: "Templates",
+            slug: "/template",
+            isAuthenticated: true
+        },
+        {
+            name: "Ananlyze Resume",
+            slug: "/generate-suggestion",
+            isAuthenticated: true
+        },
+        {
+            name: "About Us",
+            slug: "/about",
+            isAuthenticated: false
+        },
+        {
+            name: "Logout",
+            isAuthenticated: true,
+            // func: logout()
+        },
+        {
+            name: "Login",
+            slug: "/login",
+            isAuthenticated: false
+        },
+        {
+            name: "Signup",
+            slug: "/signup",
+            isAuthenticated: false
+        },
+    ]
+
 
     const list = () => (
         <Box
@@ -24,6 +62,20 @@ const MobileMenu = ({ openMenu, setOpenMenu, logout }) => {
                 <CloseIcon fontSize='medium' className='group-hover:scale-110' />
             </div>
             <ul className='text-slate-500 mt-6 divide-y-2'>
+                {/* {
+                    menuOptions.map((option, index) => (
+                        (option.isAuthenticated && isAuthenticated) ?
+                            <li key={index} className='hover:cursor-pointer hover:bg-gray-100 py-3 px-4' onClick={() => { setOpenMenu(false); option.slug && navigate(option.slug) }}>
+                                <p className=' text-md font-semibold'>{option.name}</p>
+                            </li>
+                            :
+                            (!isAuthenticated && option.isAuthenticated === false) &&
+                            <li key={index} className='hover:cursor-pointer hover:bg-gray-100 py-3 px-4' onClick={() => { setOpenMenu(false); option.slug && navigate(option.slug) }}>
+                                <p className=' text-md font-semibold'>{option.name}</p>
+                            </li>
+
+                    ))
+                } */}
                 <li className='hover:cursor-pointer hover:bg-gray-100 py-3 px-4' onClick={() => { setOpenMenu(false); navigate("/profile") }}>
                     <p className=' text-md font-semibold'>Your Profile</p>
                 </li>

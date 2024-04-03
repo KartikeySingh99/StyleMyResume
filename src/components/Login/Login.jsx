@@ -16,9 +16,10 @@ export const Login = () => {
 
     useEffect(() => {
         if (error) {
-            toast.error(error, { autoClose: 2000,position:'bottom-right' })
+            toast.error(error, { autoClose: 2000 })
         }
         if (isAuthenticated) {
+            toast.success("Log In Successfull!", { autoClose: 1000 })
             navigate('/');
         }
     }, [isAuthenticated, error])

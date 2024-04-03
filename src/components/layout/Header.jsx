@@ -5,21 +5,29 @@ import { logout } from "../../slices/authSlice";
 import authService from "../../appwrite/appwriteConfig";
 import MenuIcon from '@mui/icons-material/Menu';
 import MobileMenu from "./MobileMenu";
+import { toast } from "react-toastify";
+import { resetUser } from "../../slices/userSlice";
 
 const Header = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
-    const { isAuthenticated } = useSelector((state) => state.authStatus);
+    const { isAuthenticated, error } = useSelector((state) => state.authStatus);
 
     const [backgroundColor, setBackgroundColor] = useState("bg-primary");
     const [showMenu, setShowMenu] = useState(false);
     // const [openMenu, setOpenMenu] = useState(false);
 
+    useEffect(() => {
+        if (error) {
+            toast.error(error, { autoClose: 1000 });
+        }
+    }, [error])
+
     const handleLogout = () => {
         authService.logout()
-            .then(() => dispatch(logout()))
-            .catch((error) => console.log(error))
+            .then(() => { dispatch(logout()); dispatch(resetUser()) })
+            .catch((error) => console.log(error.code))
     }
 
     const menuItems = [
@@ -42,10 +50,10 @@ const Header = () => {
     ]
 
     const handleScroll = () => {
-        if(window.scrollY >=100){
+        if (window.scrollY >= 100) {
             setBackgroundColor('bg-primary')
         }
-        else{
+        else {
             setBackgroundColor('bg-none')
         }
     }

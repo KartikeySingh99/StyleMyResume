@@ -8,6 +8,7 @@ import GitHubIcon from '@mui/icons-material/GitHub';
 import EmailIcon from '@mui/icons-material/Email';
 import Loader from "../../components/Loader/Loader"
 import useMakeURLShort from "../../hooks/useMakeURLShort";
+import getResumeSuggestions from "../../appwrite/Suggestions";
 
 const Profile = () => {
     const dispatch = useDispatch();
@@ -25,6 +26,7 @@ const Profile = () => {
     const [skills, setSkills] = useState([]);
     const [filteredSkills, setFilteredSkills] = useState([]);
     const [isContentEditable, setIsContentEditable] = useState(null);
+    const [plainText, setPlainText] = useState("")
 
     useEffect(() => {
         if (userData) {
@@ -33,31 +35,31 @@ const Profile = () => {
         }
     }, [dispatch, userData])
 
-
     useEffect(() => {
         if (user) {
-            setPersonalData(user?.personalDetails ?? {})
-            setEducationData(user?.educationalDetails?.educationDetailsArray ?? [])
-            setExpirienceData(user?.expirienceDetails?.experienceArray ?? [])
-            setProjectData(user?.projectDetails?.projectsArray ?? [])
-            setSkills(user?.skillDetails ?? [])
+            console.log(user);
+            setPersonalData(user?.userData?.personalDetails ?? {})
+            setEducationData(user?.userData?.educationalDetails ?? [])
+            setExpirienceData(user?.userData?.expirienceDetails ?? [])
+            setProjectData(user?.userData?.projectDetails ?? [])
+            setSkills(user?.userData?.skillDetails ?? [])
         }
     }, [user])
 
-    const handleInput = (event) => {
-        const newValue = event.target.innerText;
-        // setEditedValue(newValue);
-        // console.log(newValue);
-    };
+    // const handleInput = (event) => {
+    //     const newValue = event.target.innerText;
+    //     // setEditedValue(newValue);
+    //     // console.log(newValue);
+    // };
 
     const handleEditable = (field) => {
         setIsContentEditable(field);
     }
 
-    const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        setPersonalData({ ...personalData, [name]: value });
-    }
+    // const handleInputChange = (e) => {
+    //     const { name, value } = e.target;
+    //     setPersonalData({ ...personalData, [name]: value });
+    // }
 
     useEffect(() => {
         let filteredSkills = {};
@@ -74,6 +76,23 @@ const Profile = () => {
         // console.log(filteredSkills);
     }, [skills])
 
+    useEffect(() => {
+        if (expirienceData) {
+            let textData = "";
+            expirienceData && expirienceData.forEach((data, index) => {
+                textData += `Experience ${index + 1}:
+                Position: ${data.Profile}
+                Company: ${data.Company}
+                Start Date: ${data.From}
+                End Date: ${data.To}
+                Responsibilities:
+                ${data.Responsibilities.split('\n').map((point, i) => `${i + 1}. ${point}`)}`
+            });
+            setPlainText(textData)
+        }
+    }, [expirienceData])
+
+
     // const renderField = (field, data, setData) => {
     //     if (isContentEditable === field) {
     //         return (
@@ -89,8 +108,6 @@ const Profile = () => {
     //     }
     // }
 
-    // const open_ai_key = "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";
-
     return (
         loading ?
             <Loader />
@@ -105,11 +122,7 @@ const Profile = () => {
                                         <div className="bg-white shadow rounded-lg p-6">
                                             <div className="flex flex-col items-center">
                                                 <img src="https://randomuser.me/api/portraits/men/94.jpg" className="w-32 h-32 bg-gray-300 rounded-full mb-4 shrink-0" />
-                                                {/* <EditField edit={isContentEditable} field={"Name"} setData={setPersonalData} /> */}
-                                                <h1 className="text-xl font-bold" onInput={handleInput}>{personalData?.Name}</h1>
-                                                {/* {renderField('Name', personalData.Name, setPersonalData)}
-                                            <span onClick={() => setIsContentEditable("Name")}><EditIcon /></span>
-                                            {renderField('Designation', personalData.Designation, setPersonalData)} */}
+                                                <h1 className="text-xl font-bold">{personalData?.Name}</h1>
                                                 <p className="text-gray-700">{personalData?.Designation}</p>
                                                 <div className="mt-6 flex flex-wrap gap-4 justify-center">
                                                     <button className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded" onClick={() => navigate('/edit')}>Edit Data</button>
@@ -153,9 +166,8 @@ const Profile = () => {
                                         <div className="bg-white shadow rounded-lg p-6">
                                             <h2 className="text-xl font-bold mb-4">Career Objective</h2>
                                             <p className="text-gray-700" id="careerObjective" onDoubleClick={() => handleEditable("careerObjective")}>{personalData?.CareerObjective}</p>
-                                            {/* {renderField("careerObjective", personalData?.CareerObjective, setPersonalData)} */}
 
-                                            <h2 className="text-xl font-bold mt-6 mb-4">Experience</h2>
+                                            <h2 className="text-xl font-bold mt-6 mb-4">Experience <span onClick={() => getResumeSuggestions("expirience", plainText)}>generate suggestions</span></h2>
                                             {
                                                 expirienceData && expirienceData.map((data, i) => (
                                                     <div key={i} className="mb-6">

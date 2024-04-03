@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
 import { saveData, editData, fetchUserData } from '../../slices/userSlice';
-import { useDispatch, useSelector } from 'react-redux';
 import Form from './Form';
 import Loader from "../Loader/Loader";
-import { useNavigate } from 'react-router-dom';
+import ResumeReview from '../ResumeReview/ResumeReview';
 
 function CustomTabPanel(props) {
 
@@ -60,11 +61,12 @@ const Details = ({ actionType }) => {
 
     useEffect(() => {
         if (user && actionType === "edit") {
-            setPersonalDetails(user?.personalDetails);
-            setEducationDetails(user?.educationalDetails?.educationDetailsArray);
-            setExperienceDetails(user?.expirienceDetails?.experienceArray);
-            setSkillDetails(user?.skillDetails);
-            setProjectDetails(user?.projectDetails?.projectsArray);
+            setPersonalDetails(user?.userData?.personalDetails);
+            setEducationDetails(user?.userData?.educationalDetails);
+            setExperienceDetails(user?.userData?.expirienceDetails);
+            setProjectDetails(user?.userData?.projectDetails);
+            setSkillDetails(user?.userData?.skillDetails);
+            setDetailedData(user?.userData)
         }
         else if (actionType === "create") {
             setPersonalDetails({ Name: "", Email: "", PhoneNumber: "", Address: "", Designation: "", CareerObjective: "", Linkedin: "", Github: "" });
@@ -219,7 +221,10 @@ const Details = ({ actionType }) => {
         // },
     ]
 
+    console.log(detailedData);
+
     const handlePersonalData = (data) => {
+        setPersonalDetails(data)
         setDetailedData((prev) => ({ ...prev, personalDetails: data }))
         setValue(1)
     }
@@ -233,14 +238,25 @@ const Details = ({ actionType }) => {
             return isEmpty = false;
         })
         if (!isEmpty) {
-            setDetailedData((prev) => ({ ...prev, educationalDetails: data }))
+            setEducationDetails(data.educationDetailsArray)
+            setDetailedData((prev) => ({ ...prev, educationalDetails: data.educationDetailsArray }))
         }
         setValue(2)
     }
 
     const handleSkillData = (data) => {
         // const skills = data.Skill.split(',');
-        setDetailedData((prev) => ({ ...prev, skillDetails: data.skillsArray }))
+        let isEmpty = false;
+        data.skillsArray.map((data) => {
+            if (Object.values(data).includes('')) {
+                return isEmpty = true;
+            }
+            return isEmpty = false;
+        })
+        if (!isEmpty) {
+            setSkillDetails(data.skillsArray)
+            setDetailedData((prev) => ({ ...prev, skillDetails: data.skillsArray }))
+        }
         setValue(4)
     }
 
@@ -253,7 +269,8 @@ const Details = ({ actionType }) => {
             return isEmpty = false;
         })
         if (!isEmpty) {
-            setDetailedData((prev) => ({ ...prev, expirienceDetails: data }))
+            setExperienceDetails(data.experienceArray)
+            setDetailedData((prev) => ({ ...prev, expirienceDetails: data.experienceArray }))
         }
         setValue(3)
     }
@@ -267,8 +284,9 @@ const Details = ({ actionType }) => {
             return isEmpty = false;
         })
         if (!isEmpty) {
-            setDetailedData((prev) => ({ ...prev, projectDetails: data }))
-            handleAllDetails({ ...detailedData, projectDetails: data })
+            setProjectDetails(data.projectsArray)
+            setDetailedData((prev) => ({ ...prev, projectDetails: data.projectsArray }))
+            handleAllDetails({ ...detailedData, projectDetails: data.projectsArray })
         }
         // dispatch(saveData(detailedData))
     }
@@ -290,8 +308,11 @@ const Details = ({ actionType }) => {
             <Loader />
             :
             <>
-                <div className='mt-12 w-full flex items-center justify-center'>
-                    <div className="w-full md:w-[80%] lg:w-[70%] xl:w-[50%] border shadow-xl rounded-lg">
+                <div className='mt-12 w-full flex items-center justify-center gap-x-4'>
+                    <div className='w-[30%] border self-start'>
+                        <ResumeReview formData={detailedData} />
+                    </div>
+                    <div className="w-full md:w-[80%] lg:w-[70%] xl:w-[50%] border shadow-xl rounded-lg bg-white">
                         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
                             <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
                                 <Tab label="Contact Details" />

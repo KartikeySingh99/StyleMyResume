@@ -47,6 +47,9 @@ export const userSlice = createSlice({
         userRegister: (state, action) => {
             state.user.isAuthenticated = action.payload;
         },
+        resetUser: (state) => {
+            state.user = {};
+        }
     },
     extraReducers: (builder) => {
         builder
@@ -60,7 +63,7 @@ export const userSlice = createSlice({
                 }
                 else {
                     const { personalDetails, educationalDetails, expirienceDetails, skillDetails, projectDetails, ...data } = action.payload;
-                    state.user = {
+                    state.user.userData = {
                         personalDetails: JSON.parse(personalDetails),
                         educationalDetails: JSON.parse(educationalDetails),
                         expirienceDetails: JSON.parse(expirienceDetails),
@@ -90,5 +93,5 @@ export const userSlice = createSlice({
     }
 })
 
-export const { saveData, fetchData } = userSlice.actions;
+export const { saveData, fetchData, resetUser } = userSlice.actions;
 export default userSlice.reducer;
