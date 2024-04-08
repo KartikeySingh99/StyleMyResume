@@ -1,3 +1,7 @@
+import { useRef } from "react";
+import navbarContext from "../layout/navbarContext";
+import { useReactToPrint } from 'react-to-print';
+
 const FormatBar = ({
     setFontStyle,
     setFontSize,
@@ -5,16 +9,23 @@ const FormatBar = ({
     fontSize,
     margin,
     setMargin,
-    printButton
+    componentRef
 }) => {
+
+    // const navbarHeight = useContext(navbarContext);
+    // console.log("navbar ki height=>",navbarHeight);
+
+    const handlePrint = useReactToPrint({
+        content: () => componentRef.current,
+    });
 
     return (
         <>
-            <div className="sticky top-14 w-full h-full bg-white flex items-center justify-between px-2 md:px-4 lg:px-6">
-                <div className="flex items-center justify-center divide-x-2">
-                    <div className="px-4 py-2">
-                        <h1 className="font-semibold text-sm">Font Styles</h1>
-                        <select name="" className="border rounded-sm border-gray-300" value={fontStyle} onChange={(e) => setFontStyle(e.target.value)}>
+            <div className="sticky top-[60px] z-10 w-full bg-white flex items-center justify-between px-2 md:px-4 lg:px-6">
+                <div className="flex items-center justify-center">
+                    <div className="lg:px-4 py-2">
+                        <h1 className="font-semibold text-sm mb-1">Font Styles</h1>
+                        <select name="" className="text-sm lg:text-base border rounded-sm border-gray-300" value={fontStyle} onChange={(e) => setFontStyle(e.target.value)}>
                             <option value="" disabled>Select Font</option>
                             <option value="font-mono">Mono</option>
                             <option value="font-Inter">Inter</option>
@@ -24,8 +35,8 @@ const FormatBar = ({
                         </select>
                     </div>
                     <div className="px-4 py-2">
-                        <h1 className="font-semibold text-sm">Margin</h1>
-                        <select name="" className="border rounded-sm border-gray-300" value={margin} onChange={(e) => setMargin(e.target.value)}>
+                        <h1 className="font-semibold text-sm mb-1">Margin</h1>
+                        <select name="" className="text-sm lg:text-base border rounded-sm border-gray-300" value={margin} onChange={(e) => setMargin(e.target.value)}>
                             <option value="" disabled>Select Margin</option>
                             <option value="p-5">Normal</option>
                             <option value="px-4 py-2">Narrow</option>
@@ -34,7 +45,7 @@ const FormatBar = ({
                     </div>
                 </div>
                 <div>
-                    <button className="px-4 py-2 bg-primary text-white rounded-lg" onClick={printButton}>Download</button>
+                    <button className="px-4 py-2 bg-primary text-white rounded-lg" onClick={handlePrint}>Download</button>
                 </div>
                 {/* <div className="px-4 py-2">
                     <h1 className="font-semibold text-sm">Font Size</h1>

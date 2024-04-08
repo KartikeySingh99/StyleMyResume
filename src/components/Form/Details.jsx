@@ -72,7 +72,7 @@ const Details = ({ actionType }) => {
             setPersonalDetails({ Name: "", Email: "", PhoneNumber: "", Address: "", Designation: "", CareerObjective: "", Linkedin: "", Github: "" });
             setEducationDetails([{ Course: "", InstituteName: "", Year: "", Marks: "" }])
             setExperienceDetails([{ Company: "", Profile: "", From: "", To: '', Responsibilities: "" }])
-            setProjectDetails([{ Project: "", Description: "", Link: "", Year: "" }])
+            setProjectDetails([{ Project: "", Description: "", Link: "", Year: "", SkillsUsed: "" }])
             setSkillDetails([{ Skill: "", skillType: "" }])
         }
     }, [actionType, user])
@@ -96,7 +96,7 @@ const Details = ({ actionType }) => {
         },
         {
             name: "Address",
-            placeholder: "Enter Address",
+            placeholder: "Enter Address Only State or City",
             type: "text"
         },
         {
@@ -165,11 +165,18 @@ const Details = ({ actionType }) => {
         },
         {
             name: "Link",
-            type: "text"
+            type: "text",
+            placeholder:"Paste Your Project Link"
         },
         {
             name: "Year",
-            type: "text"
+            type: "text",
+            placeholder:"Enter Year"
+        },
+        {
+            name: "SkillsUsed",
+            type: "text",
+            placeholder:"Enter Skills Used In This Project"
         },
         {
             name: "Description",

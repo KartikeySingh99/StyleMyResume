@@ -82,7 +82,7 @@ export const userSlice = createSlice({
                 state.loading = true;
             })
             .addCase(editData.fulfilled, (state, action) => {
-                state.user = action.payload;
+                state.user.userData = action.payload;
                 state.loading = false;
                 state.isUpdated = true;
             })

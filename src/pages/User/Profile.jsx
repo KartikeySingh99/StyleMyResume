@@ -26,7 +26,9 @@ const Profile = () => {
     const [skills, setSkills] = useState([]);
     const [filteredSkills, setFilteredSkills] = useState([]);
     const [isContentEditable, setIsContentEditable] = useState(null);
-    const [plainText, setPlainText] = useState("")
+    // const [plainText, setPlainText] = useState("")
+    const [experiencePlainText, setExperiencePlainText] = useState("");
+    const [projectsPlainText, setProjectsPlainText] = useState("");
 
     useEffect(() => {
         if (userData) {
@@ -82,15 +84,24 @@ const Profile = () => {
             expirienceData && expirienceData.forEach((data, index) => {
                 textData += `Experience ${index + 1}:
                 Position: ${data.Profile}
-                Company: ${data.Company}
-                Start Date: ${data.From}
-                End Date: ${data.To}
                 Responsibilities:
                 ${data.Responsibilities.split('\n').map((point, i) => `${i + 1}. ${point}`)}`
             });
-            setPlainText(textData)
+            setExperiencePlainText(textData)
         }
-    }, [expirienceData])
+        if (projecData) {
+            let textData = "";
+            projecData && projecData.forEach((data, index) => {
+                textData += `Project ${index + 1}:
+                Project Name: ${data.Project}
+                Skills: ${data.SkillsUsed}
+                Description: 
+                ${data.Description.split('\n').map((point, i) => `${i + 1}. ${point}`)}
+                `
+            })
+            setProjectsPlainText(textData);
+        }
+    }, [expirienceData, projecData])
 
 
     // const renderField = (field, data, setData) => {
@@ -167,7 +178,7 @@ const Profile = () => {
                                             <h2 className="text-xl font-bold mb-4">Career Objective</h2>
                                             <p className="text-gray-700" id="careerObjective" onDoubleClick={() => handleEditable("careerObjective")}>{personalData?.CareerObjective}</p>
 
-                                            <h2 className="text-xl font-bold mt-6 mb-4">Experience <span onClick={() => getResumeSuggestions("expirience", plainText)}>generate suggestions</span></h2>
+                                            <h2 className="text-xl font-bold mt-6 mb-4">Experience <span onClick={() => getResumeSuggestions("expirience", experiencePlainText)}>generate suggestions</span></h2>
                                             {
                                                 expirienceData && expirienceData.map((data, i) => (
                                                     <div key={i} className="mb-6">
@@ -206,13 +217,13 @@ const Profile = () => {
                                                     </div>
                                                 ))
                                             }
-                                            <h2 className="text-xl font-bold mt-6 mb-4">Projects</h2>
+                                            <h2 className="text-xl font-bold mt-6 mb-4">Projects <span onClick={() => getResumeSuggestions("projects", projectsPlainText)}>generate suggestions</span></h2>
                                             {
                                                 projecData && projecData.map((data, i) => (
                                                     <div key={i} className="mb-6">
                                                         <div className="flex justify-between gap-2 w-full">
                                                             <div>
-                                                                <p className="text-gray-700 font-bold" > <span> {data.Project}</span> <span> <a href={data.Link} target="_"><OpenInNewIcon fontSize="medium" /></a></span></p>
+                                                                <p className="text-gray-700 font-bold" > <span> {data.Project}</span> <span>|&nbsp;{data.SkillsUsed}</span> <span> <a href={data.Link} target="_"><OpenInNewIcon fontSize="medium" /></a></span></p>
                                                                 <ul className="list-disc list-outside ml-6 md:w-[70%]">
                                                                     {
                                                                         data.Description.split('\n').map((point, i) => (

@@ -119,7 +119,7 @@ const Form = ({ sectionName, label, defaultValues = {}, formFields, dynamicField
                                                         control={control}
                                                         render={({ field }) => item.name === "Responsibilities" || item.name === "Description" ?
                                                             <div className='relative group'>
-                                                                <textarea className={'px-3 py-4 border border-gray-200 rounded-md hover:border-black' + `${isFocused ? 'outline outline-primary border-primary' : ""}`} placeholder={item.placeholder} onFocus={handleFocus} onBlurCapture={handleBlur} name={item.name} {...field} id="responsibility" cols="40" rows="2" />
+                                                                <textarea className={'px-3 py-4 border border-gray-300 rounded-md hover:border-black' + `${isFocused ? 'outline outline-primary border-primary' : ""}`} placeholder={item.placeholder} onFocus={handleFocus} onBlurCapture={handleBlur} name={item.name} {...field} id="responsibility" cols="40" rows="4" />
                                                                 <label htmlFor="responsibility"
                                                                     className={'absolute bg-white px-3 text-sm text-primary -top-3 left-2 ' + `${isFocused?'text-primary':'text-gray-500'}`}
                                                                 >Description</label>

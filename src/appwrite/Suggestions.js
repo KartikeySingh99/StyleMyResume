@@ -3,7 +3,7 @@ import OpenAI from "openai";
 
 const getResumeSuggestions = async (resumeSection, data) => {
 
-    const api_key = "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";
+    const api_key = import.meta.env.VITE_OPENAI_API_KEY;
     const openai = new OpenAI({
         apiKey: api_key,
         dangerouslyAllowBrowser: true
@@ -29,6 +29,7 @@ const getResumeSuggestions = async (resumeSection, data) => {
         console.log(response.choices[0].message.content);
     }
     catch (error) {
+        console.log(error);
         return error;
     }
 }
