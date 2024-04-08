@@ -30,7 +30,7 @@ const Home = () => {
         // }
     }, [dispatch, error])
 
-    console.log(user);
+    // console.log(user);
 
     return (
         <>

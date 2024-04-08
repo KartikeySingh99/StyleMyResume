@@ -8,6 +8,8 @@ import { saveData, editData, fetchUserData } from '../../slices/userSlice';
 import Form from './Form';
 import Loader from "../Loader/Loader";
 import ResumeReview from '../ResumeReview/ResumeReview';
+import ReviewPopup from '../ResumeReview/ReviewPopup';
+import Review from "/review.png";
 
 function CustomTabPanel(props) {
 
@@ -48,6 +50,8 @@ const Details = ({ actionType }) => {
     const [skillDetails, setSkillDetails] = useState([]);
     const [personalDetails, setPersonalDetails] = useState({});
     const [projectDetails, setProjectDetails] = useState([]);
+
+    const [open, setOpen] = useState(false)
 
     const handleChange = (event, newValue) => {
         setValue(newValue);
@@ -166,17 +170,17 @@ const Details = ({ actionType }) => {
         {
             name: "Link",
             type: "text",
-            placeholder:"Paste Your Project Link"
+            placeholder: "Paste Your Project Link"
         },
         {
             name: "Year",
             type: "text",
-            placeholder:"Enter Year"
+            placeholder: "Enter Year"
         },
         {
             name: "SkillsUsed",
             type: "text",
-            placeholder:"Enter Skills Used In This Project"
+            placeholder: "Enter Skills Used In This Project"
         },
         {
             name: "Description",
@@ -228,7 +232,7 @@ const Details = ({ actionType }) => {
         // },
     ]
 
-    console.log(detailedData);
+    // console.log(detailedData);
 
     const handlePersonalData = (data) => {
         setPersonalDetails(data)
@@ -315,8 +319,8 @@ const Details = ({ actionType }) => {
             <Loader />
             :
             <>
-                <div className='mt-12 w-full flex items-center justify-center gap-x-4'>
-                    <div className='w-[30%] border self-start'>
+                <div className='relative mt-12 md:mt-16 w-full flex items-start justify-center gap-x-4 md:px-4 md:py-4'>
+                    <div className='lg:block hidden w-[30%]'>
                         <ResumeReview formData={detailedData} />
                     </div>
                     <div className="w-full md:w-[80%] lg:w-[70%] xl:w-[50%] border shadow-xl rounded-lg bg-white">
@@ -399,6 +403,10 @@ const Details = ({ actionType }) => {
                         </CustomTabPanel>
                     </div>
                 </div>
+                <div className='block lg:hidden container shadow-2xl border bg-white rounded-full fixed right-2 bottom-4 w-fit animate-bounce'>
+                    <button className='text-sm font-semibold flex items-center justify-center' onClick={() => setOpen(true)}> <img src={Review} className='object-contain' width={50} alt="" /> </button>
+                </div>
+                    <ReviewPopup formData={detailedData} open={open} setOpen={setOpen} />
             </>
     )
 }

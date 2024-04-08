@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
-import Template1 from "/template.webp";
-import Template2 from "/template2.png";
+import Template1 from "/resume1.png";
+import Template2 from "/resume2.png";
 import Template3 from "/template3.png";
 import Template4 from "/template4.webp";
 import Template5 from "/template.webp";
@@ -25,9 +25,9 @@ const TemplatePreview = () => {
         <>
             {
                 templateData.map((data) => (
-                    <div key={data.image} className="template relative border border-black w-[290px] h-[410px] flex items-center justify-center">
+                    <div key={data.image} className="template relative shadow-xl border border-gray-200 w-[290px] h-[410px] flex items-center justify-center">
                         <div className="">
-                            <img src={data.image} alt="" />
+                            <img src={data.image} width={300} height={500} alt="" />
                         </div>
                         <button className="absolute z-10 text-md font-bold px-6 py-2 rounded-xl bg-primary text-white" onClick={() => navigate(data.url)}>Use This Template</button>
                     </div>

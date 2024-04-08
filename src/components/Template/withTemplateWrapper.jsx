@@ -16,7 +16,8 @@ const withTemplateWrapper = (WrappedComponent) => {
         const { user } = useSelector((state) => state.user);
         const { userData } = useSelector((state) => state.authStatus)
         const [fontStyle, setFontStyle] = useState("font-sans")
-        const [margin, setMargin] = useState("p-5");
+        const [margin, setMargin] = useState("px-8 py-4");
+        const [zoomLevel, setZoomLevel] = useState(60); // Default zoom level
 
         useEffect(() => {
             if (userData) {
@@ -24,9 +25,27 @@ const withTemplateWrapper = (WrappedComponent) => {
             }
         }, [dispatch, userData])
 
+        useEffect(() => {
+            if (componentRef.current) {
+              const content = componentRef.current;
+              content.scrollLeft *= zoomLevel / 100;
+              content.scrollTop *= zoomLevel / 100;
+            }
+          }, [zoomLevel]);
+
         return (
             <div className="flex items-center justify-center flex-col gap-y-4 bg-gray-100 py-16 rounded-lg shadow-xl">
-                <WrappedComponent {...props} user={user} fontStyle={fontStyle} setFontStyle={setFontStyle} margin={margin} setMargin={setMargin} componentRef={componentRef} />
+                <WrappedComponent
+                    {...props}
+                    user={user}
+                    fontStyle={fontStyle}
+                    setFontStyle={setFontStyle}
+                    margin={margin}
+                    setMargin={setMargin}
+                    zoomLevel={zoomLevel}
+                    setZoomLevel={setZoomLevel}
+                    componentRef={componentRef}
+                />
             </div>
         )
     }

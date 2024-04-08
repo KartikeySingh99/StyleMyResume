@@ -2,9 +2,10 @@ import { useEffect, useState } from "react";
 import useMakeURLShort from "../../hooks/useMakeURLShort";
 import withTemplateWrapper from "../../components/Template/withTemplateWrapper";
 import FormatBar from "../../components/Template/FormatBar";
+import BottomNavbar from "../../components/Template/BottomNavbar";
 import propTypes from "prop-types";
 
-const Template2 = ({ componentRef, user, margin, setMargin, fontStyle, setFontStyle }) => {
+const Template2 = ({ componentRef, user, margin, setMargin, fontStyle, setFontStyle, zoomLevel, setZoomLevel }) => {
 
     const [filteredSkills, setFilterSkills] = useState({});
 
@@ -31,7 +32,7 @@ const Template2 = ({ componentRef, user, margin, setMargin, fontStyle, setFontSt
     return (
         <>
             <FormatBar componentRef={componentRef} fontStyle={fontStyle} setFontStyle={setFontStyle} margin={margin} setMargin={setMargin} />
-            <div className="w-fit shadow-xl rounded-lg">
+            <div className="w-fit shadow-xl rounded-lg" >
                 <div ref={componentRef} className={`${fontStyle} lg:w-[794px] lg:h-[1123px] rounded-lg bg-white ${margin}`}>
                     <div className="p-4 sm:p-6">
                         <div className="flex items-center justify-between">
@@ -99,7 +100,7 @@ const Template2 = ({ componentRef, user, margin, setMargin, fontStyle, setFontSt
                                 <h3 className="text-lg font-semibold mb-2">Skills</h3>
                                 <ul className="list-disc list-inside text-sm">
                                     {
-                                        Object.entries(filteredSkills).map((skill,index)=>(
+                                        Object.entries(filteredSkills).map((skill, index) => (
                                             <li key={index}>
                                                 <span className="font-semibold">{skill[0]}:&nbsp;</span>
                                                 <span>{skill[1].join(', ')}</span>
@@ -112,7 +113,7 @@ const Template2 = ({ componentRef, user, margin, setMargin, fontStyle, setFontSt
                     </div>
                 </div>
             </div>
-
+            {/* <BottomNavbar zoomLevel={zoomLevel} setZoomLevel={setZoomLevel} /> */}
         </>
     );
 };

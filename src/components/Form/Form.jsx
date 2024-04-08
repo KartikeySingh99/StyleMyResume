@@ -10,13 +10,14 @@ import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { Tooltip } from '@mui/material';
 import SwapVertIcon from '@mui/icons-material/SwapVert';
+import { Reorder } from "framer-motion";
 
 const Form = ({ sectionName, label, defaultValues = {}, formFields, dynamicFields, onSubmit, setValue, value }) => {
 
     const fieldRef = useRef([]);
 
     const { control, handleSubmit } = useForm({ defaultValues })
-    const { fields, append, remove, swap } = useFieldArray({ control, name: `${label}Array` })
+    const { fields, append, remove, swap,update } = useFieldArray({ control, name: `${label}Array` })
 
     const [expanded, setExpanded] = useState(0)
     const [isFocused, setIsFocused] = useState(false);
@@ -83,60 +84,63 @@ const Form = ({ sectionName, label, defaultValues = {}, formFields, dynamicField
                     }
                 </div>
                 <form className='text-center' onSubmit={handleSubmit(onSubmit)}>
-                    {
-                        fields.map((fieldData, i) => (
-
-                            <div
-                                key={fieldData.id}
-                                className='w-full flex items-start justify-center gap-x-4'
-                                draggable
-                                onDragStart={(e) => handleDragStart(e, i)}
-                                onDragOver={handleDragOver}
-                                onDrop={(e) => handleDrop(e, i)}
-                            >
-                                <Tooltip title={`Swap Position`} placement='left' arrow >
-                                    <button type='button' onClick={() => handleReposition(i)}><SwapVertIcon fontSize='medium' /></button>
-                                </Tooltip>
-
-                                < Accordion ref={input => fieldRef.current[i] = input} className='w-full my-1' expanded={expanded === i} onChange={handleChange(i)} >
-                                    <AccordionSummary
-                                        expandIcon={<ExpandMoreIcon />}
-                                        aria-controls="panel1a-content"
-                                        id="panel1a-header"
+                    <Reorder.Group values={fields} onReorder={update} >
+                        {
+                            fields.map((fieldData, i) => (
+                                <Reorder.Item key={fieldData.id} value={fieldData}>
+                                    <div
+                                        key={fieldData.id}
+                                        className='w-full flex items-start justify-center gap-x-4'
+                                        draggable
+                                        onDragStart={(e) => handleDragStart(e, i)}
+                                        onDragOver={handleDragOver}
+                                        onDrop={(e) => handleDrop(e, i)}
                                     >
-                                        <div className='flex items-center justify-center gap-x-4'>
-                                            <h1 className='text-sm font-semibold'>{sectionName} {i + 1}</h1>
-                                        </div>
-                                    </AccordionSummary>
+                                        <Tooltip title={`Swap Position`} placement='left' arrow >
+                                            <button type='button' onClick={() => handleReposition(i)}><SwapVertIcon fontSize='medium' /></button>
+                                        </Tooltip>
 
-                                    <AccordionDetails>
-                                        <div className='flex justify-center flex-wrap gap-x-4 gap-y-2 lg:gap-y-4 w-full'>
-                                            {
-                                                dynamicFields && dynamicFields.map((item, j) => (
-                                                    <Controller
-                                                        key={j}
-                                                        name={`${label}Array[${i}].${item.name}`}
-                                                        control={control}
-                                                        render={({ field }) => item.name === "Responsibilities" || item.name === "Description" ?
-                                                            <div className='relative group'>
-                                                                <textarea className={'px-3 py-4 border border-gray-300 rounded-md hover:border-black' + `${isFocused ? 'outline outline-primary border-primary' : ""}`} placeholder={item.placeholder} onFocus={handleFocus} onBlurCapture={handleBlur} name={item.name} {...field} id="responsibility" cols="40" rows="4" />
-                                                                <label htmlFor="responsibility"
-                                                                    className={'absolute bg-white px-3 text-sm text-primary -top-3 left-2 ' + `${isFocused?'text-primary':'text-gray-500'}`}
-                                                                >Description</label>
-                                                            </div> :
-                                                            <TextField type={item.type} {...field} className='self-start' name={item.name} label={item.name} placeholder={item.placeholder} variant="outlined" margin='dense' />}
-                                                    />
-                                                ))
-                                            }
-                                        </div>
-                                    </AccordionDetails>
-                                </Accordion>
-                                <Tooltip title="Remove This Field" placement='right' arrow>
-                                    <button className='text-red-500' type='button' onClick={() => remove(i)}><DeleteIcon fontSize='medium' /></button>
-                                </Tooltip>
-                            </div>
-                        ))
-                    }
+                                        < Accordion ref={input => fieldRef.current[i] = input} className='w-full my-1' expanded={expanded === i} onChange={handleChange(i)} >
+                                            <AccordionSummary
+                                                expandIcon={<ExpandMoreIcon />}
+                                                aria-controls="panel1a-content"
+                                                id="panel1a-header"
+                                            >
+                                                <div className='flex items-center justify-center gap-x-4'>
+                                                    <h1 className='text-sm font-semibold'>{sectionName} {i + 1}</h1>
+                                                </div>
+                                            </AccordionSummary>
+
+                                            <AccordionDetails>
+                                                <div className='flex justify-center flex-wrap gap-x-4 gap-y-2 lg:gap-y-4 w-full'>
+                                                    {
+                                                        dynamicFields && dynamicFields.map((item, j) => (
+                                                            <Controller
+                                                                key={j}
+                                                                name={`${label}Array[${i}].${item.name}`}
+                                                                control={control}
+                                                                render={({ field }) => item.name === "Responsibilities" || item.name === "Description" ?
+                                                                    <div className='relative group'>
+                                                                        <textarea className={'px-3 py-4 border border-gray-300 rounded-md hover:border-black' + `${isFocused ? 'outline outline-primary border-primary' : ""}`} placeholder={item.placeholder} onFocus={handleFocus} onBlurCapture={handleBlur} name={item.name} {...field} id="responsibility" cols="40" rows="4" />
+                                                                        <label htmlFor="responsibility"
+                                                                            className={'absolute bg-white px-3 text-sm text-primary -top-3 left-2 ' + `${isFocused ? 'text-primary' : 'text-gray-500'}`}
+                                                                        >Description</label>
+                                                                    </div> :
+                                                                    <TextField type={item.type} {...field} className='self-start' name={item.name} label={item.name} placeholder={item.placeholder} variant="outlined" margin='dense' />}
+                                                            />
+                                                        ))
+                                                    }
+                                                </div>
+                                            </AccordionDetails>
+                                        </Accordion>
+                                        <Tooltip title="Remove This Field" placement='right' arrow>
+                                            <button className='text-red-500' type='button' onClick={() => remove(i)}><DeleteIcon fontSize='medium' /></button>
+                                        </Tooltip>
+                                    </div>
+                                </Reorder.Item>
+                            ))
+                        }
+                    </Reorder.Group>
                     <div className='flex my-4 gap-y-2 gap-x-4 lg:gap-y-4 justify-center flex-col md:flex-row flex-wrap'>
 
                         {

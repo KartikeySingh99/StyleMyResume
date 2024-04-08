@@ -8,7 +8,8 @@ import GitHubIcon from '@mui/icons-material/GitHub';
 import EmailIcon from '@mui/icons-material/Email';
 import Loader from "../../components/Loader/Loader"
 import useMakeURLShort from "../../hooks/useMakeURLShort";
-import getResumeSuggestions from "../../appwrite/Suggestions";
+import SuggestionBot from "../../components/SuggestionBot/SuggestionBot";
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 
 const Profile = () => {
     const dispatch = useDispatch();
@@ -26,9 +27,9 @@ const Profile = () => {
     const [skills, setSkills] = useState([]);
     const [filteredSkills, setFilteredSkills] = useState([]);
     const [isContentEditable, setIsContentEditable] = useState(null);
-    // const [plainText, setPlainText] = useState("")
-    const [experiencePlainText, setExperiencePlainText] = useState("");
-    const [projectsPlainText, setProjectsPlainText] = useState("");
+    const [sectionName, setSectionName] = useState("")
+    const [sectionData, setSectionData] = useState("")
+    const [open, setOpen] = useState(false);
 
     useEffect(() => {
         if (userData) {
@@ -39,7 +40,6 @@ const Profile = () => {
 
     useEffect(() => {
         if (user) {
-            console.log(user);
             setPersonalData(user?.userData?.personalDetails ?? {})
             setEducationData(user?.userData?.educationalDetails ?? [])
             setExpirienceData(user?.userData?.expirienceDetails ?? [])
@@ -78,31 +78,40 @@ const Profile = () => {
         // console.log(filteredSkills);
     }, [skills])
 
-    useEffect(() => {
-        if (expirienceData) {
-            let textData = "";
-            expirienceData && expirienceData.forEach((data, index) => {
-                textData += `Experience ${index + 1}:
-                Position: ${data.Profile}
-                Responsibilities:
-                ${data.Responsibilities.split('\n').map((point, i) => `${i + 1}. ${point}`)}`
-            });
-            setExperiencePlainText(textData)
-        }
-        if (projecData) {
-            let textData = "";
-            projecData && projecData.forEach((data, index) => {
-                textData += `Project ${index + 1}:
+    const GeneratePlainTextData = (sectionName) => {
+
+        let textData = "";
+
+        switch (sectionName) {
+            case 'experience':
+                console.log("experience");
+                expirienceData && expirienceData.forEach((data, index) => {
+                    textData += `Experience ${index + 1}:
+                    Position: ${data.Profile}
+                    Responsibilities:
+                    ${data.Responsibilities.split('\n').map((point, i) => `${i + 1}. ${point}`)}`
+                });
+                setOpen(true)
+                setSectionData(textData)
+                break;
+            case 'project': console.log("project");
+                projecData && projecData.forEach((data, index) => {
+                    textData += `Project ${index + 1}:
                 Project Name: ${data.Project}
                 Skills: ${data.SkillsUsed}
                 Description: 
                 ${data.Description.split('\n').map((point, i) => `${i + 1}. ${point}`)}
                 `
-            })
-            setProjectsPlainText(textData);
+                })
+                setOpen(true)
+                setSectionData(textData);
+                break;
+            default: console.log("not valid!")
         }
-    }, [expirienceData, projecData])
+    }
 
+    // console.log("sectionName=>", sectionName);
+    // console.log("sectionData=>", sectionData);
 
     // const renderField = (field, data, setData) => {
     //     if (isContentEditable === field) {
@@ -176,14 +185,20 @@ const Profile = () => {
                                     <div className="col-span-4 sm:col-span-9">
                                         <div className="bg-white shadow rounded-lg p-6">
                                             <h2 className="text-xl font-bold mb-4">Career Objective</h2>
-                                            <p className="text-gray-700" id="careerObjective" onDoubleClick={() => handleEditable("careerObjective")}>{personalData?.CareerObjective}</p>
-
-                                            <h2 className="text-xl font-bold mt-6 mb-4">Experience <span onClick={() => getResumeSuggestions("expirience", experiencePlainText)}>generate suggestions</span></h2>
+                                            <p className="text-gray-700" id="careerObjective">{personalData?.CareerObjective}</p>
+                                            <div className="flex items-end justify-start gap-x-4  mt-6 mb-4">
+                                                <h2 className="text-xl font-bold">Experience</h2>
+                                                {expirienceData ?
+                                                    <p className="hover:cursor-pointer flex items-center gap-x-1 text-white rounded-md text-sm p-2 bg-color1" onClick={() => { setSectionName("experience"); GeneratePlainTextData("experience") }}> <span><AutoAwesomeIcon fontSize="small" /></span> Get AI Suggestions</p>
+                                                    :
+                                                    <span>Add Your Experience</span>
+                                                }
+                                            </div>
                                             {
                                                 expirienceData && expirienceData.map((data, i) => (
                                                     <div key={i} className="mb-6">
                                                         <div className="flex justify-between flex-wrap gap-2 w-full">
-                                                            <p className="text-gray-700 font-bold" onDoubleClick={() => handleEditable("JobProfile")}>{data.Profile} | {data?.Company}</p>
+                                                            <p className="text-gray-700 font-bold">{data.Profile} | {data?.Company}</p>
                                                             <span className="text-gray-700">{data.From} - {data.To}</span>
                                                         </div>
                                                         <div className="mt-2">
@@ -200,7 +215,9 @@ const Profile = () => {
                                                     </div>
                                                 ))
                                             }
-                                            <h2 className="text-xl font-bold mt-6 mb-4">Education</h2>
+                                            <div className="flex items-end justify-start gap-x-4  mt-6 mb-4">
+                                                <h2 className="text-xl font-bold">Education</h2>
+                                            </div>
                                             {
                                                 educationData && educationData.map((data, i) => (
                                                     <div key={i} className="mb-6">
@@ -217,7 +234,14 @@ const Profile = () => {
                                                     </div>
                                                 ))
                                             }
-                                            <h2 className="text-xl font-bold mt-6 mb-4">Projects <span onClick={() => getResumeSuggestions("projects", projectsPlainText)}>generate suggestions</span></h2>
+                                            <div className="flex items-end justify-start gap-x-4  mt-6 mb-4">
+                                                <h2 className="text-xl font-bold">Projects</h2>
+                                                {projecData ?
+                                                    <p className="hover:cursor-pointer flex items-center gap-x-1 text-white rounded-md text-sm p-2 bg-color1" onClick={() => {setSectionName("project"); GeneratePlainTextData("project")}}> <span><AutoAwesomeIcon fontSize="small" /></span> Get AI Suggestions</p>
+                                                    :
+                                                    <span>Add Your Projects</span>
+                                                }
+                                            </div>
                                             {
                                                 projecData && projecData.map((data, i) => (
                                                     <div key={i} className="mb-6">
@@ -247,6 +271,7 @@ const Profile = () => {
 
                     </div>
                 </div>
+                <SuggestionBot open={open} setOpen={setOpen} sectionName={sectionName} sectionData={sectionData} />
             </>
     )
 }

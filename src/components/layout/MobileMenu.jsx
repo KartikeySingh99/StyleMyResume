@@ -3,10 +3,13 @@ import Box from '@mui/material/Box';
 import Drawer from '@mui/material/Drawer';
 import { useNavigate } from 'react-router-dom';
 import CloseIcon from '@mui/icons-material/Close';
+import {toast} from "react-toastify";
 
 const MobileMenu = ({ openMenu, setOpenMenu, logout }) => {
 
     const { isAuthenticated } = useSelector((state) => state.authStatus);
+    const { user, error } = useSelector((state) => state.user);
+
 
     const navigate = useNavigate();
 
@@ -18,7 +21,7 @@ const MobileMenu = ({ openMenu, setOpenMenu, logout }) => {
         },
         {
             name: "Templates",
-            slug: "/template",
+            slug: "/templates",
             isAuthenticated: true
         },
         {
@@ -49,6 +52,18 @@ const MobileMenu = ({ openMenu, setOpenMenu, logout }) => {
     ]
 
 
+    const checkProfile = () => {
+        if (isAuthenticated && Object.entries(user).length > 0) {
+            setOpenMenu(false)
+            setOpenMenu(false)
+            navigate('/profile')
+        }
+        else {
+            toast.error(error, { autoclose: 1000 })
+            setOpenMenu(false)
+        }
+    }
+
     const list = () => (
         <Box
             role="presentation"
@@ -76,10 +91,10 @@ const MobileMenu = ({ openMenu, setOpenMenu, logout }) => {
 
                     ))
                 } */}
-                <li className='hover:cursor-pointer hover:bg-gray-100 py-3 px-4' onClick={() => { setOpenMenu(false); navigate("/profile") }}>
+                <li className='hover:cursor-pointer hover:bg-gray-100 py-3 px-4' onClick={checkProfile}>
                     <p className=' text-md font-semibold'>Your Profile</p>
                 </li>
-                <li className='hover:cursor-pointer hover:bg-gray-100 py-3 px-4' onClick={() => { setOpenMenu(false); navigate("/template") }}>
+                <li className='hover:cursor-pointer hover:bg-gray-100 py-3 px-4' onClick={() => { setOpenMenu(false); navigate("/templates") }}>
                     <p className=' text-md font-semibold'>Templates</p>
                 </li>
                 <li className='hover:cursor-pointer hover:bg-gray-100 py-3 px-4 ' onClick={() => { setOpenMenu(false); navigate("/aboutus") }}>
