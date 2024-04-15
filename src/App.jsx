@@ -1,10 +1,8 @@
-import { lazy, Suspense } from "react"
-import './App.css';
-import Header from './components/layout/Header';
-import Home from './pages/Home/Home';
+import {  useEffect,lazy, Suspense } from "react"
 import { Routes, Route } from "react-router-dom";
 import { useDispatch } from 'react-redux';
-import { useEffect } from 'react';
+import Header from './components/layout/Header';
+import Home from './pages/Home/Home';
 import authService from "./appwrite/appwriteConfig";
 import { logout, Login as login, getUser } from './slices/authSlice';
 import { fetchUserData } from './slices/userSlice';
@@ -12,6 +10,7 @@ import ProtectedRoute from "./components/Auth/ProtectedRoute";
 import { ToastContainer } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
 import Loader from "./components/Loader/Loader";
+import './App.css';
 
 const Login = lazy(() => import('./pages/Login/Login'));
 const SignUp = lazy(() => import('./pages/Login/SignUp'))
