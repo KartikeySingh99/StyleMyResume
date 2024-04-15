@@ -1,49 +1,33 @@
+import { lazy, Suspense } from "react"
 import './App.css';
 import Header from './components/layout/Header';
 import Home from './pages/Home/Home';
 import { Routes, Route } from "react-router-dom";
-import Login from './pages/Login/Login';
-import SignUp from './pages/Login/SignUp';
 import { useDispatch } from 'react-redux';
 import { useEffect } from 'react';
 import authService from "./appwrite/appwriteConfig";
 import { logout, Login as login, getUser } from './slices/authSlice';
 import { fetchUserData } from './slices/userSlice';
-import DetailsPage from './pages/Details/DetailsPage';
-import EditDetails from './pages/Details/EditDetails';
 import ProtectedRoute from "./components/Auth/ProtectedRoute";
 import { ToastContainer } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
-import TemplatePage from './pages/Templates/TemplatePage';
-import Profile from './pages/User/Profile';
-import SuggestionsPage from './pages/SuggestionPage/SuggestionsPage';
-import Template1WithLogic from './pages/Templates/Template1';
-import Template2WithLogic from './pages/Templates/Template2';
+import Loader from "./components/Loader/Loader";
+
+const Login = lazy(() => import('./pages/Login/Login'));
+const SignUp = lazy(() => import('./pages/Login/SignUp'))
+const DetailsPage = lazy(() => import('./pages/Details/DetailsPage'))
+const EditDetails = lazy(() => import('./pages/Details/EditDetails'))
+const Profile = lazy(() => import('./pages/User/Profile'))
+const TemplatePage = lazy(() => import('./pages/Templates/TemplatePage'))
+const Template1WithLogic = lazy(() => import('./pages/Templates/Template1'))
+const Template2WithLogic = lazy(() => import('./pages/Templates/Template2'))
 
 function App() {
 
   const dispatch = useDispatch();
 
-
   useEffect(() => {
-    // const fetchData = async () => {
-    //   console.log("app call");
-    //   try {
-    //     const data = await authService.getCurrentUser();
-    //     if (data) {
-    //       console.log(data);
-    //       dispatch(getUser(data));
-    //       dispatch(login(data));
-    //       dispatch(fetchUserData(data));
-    //     } else {
-    //       dispatch(logout());
-    //     }
-    //   } catch (err) {
-    //     console.error(err);
-    //   }
-    // };
-
-    // fetchData();
+   
     authService.getCurrentUser()
       .then((data) => {
         if (data.error) {
@@ -72,46 +56,45 @@ function App() {
         theme="light"
       />
       <Header />
-      <Routes>
-        <Route path='/' element={<Home />} />
-        <Route exact path='/templates' element={
-          <ProtectedRoute>
-            <TemplatePage />
-          </ProtectedRoute>
-        } />
-        <Route exact path='/template1' element={
-          <ProtectedRoute>
-            <Template1WithLogic />
-          </ProtectedRoute>
-        } />
-        <Route exact path='/template2' element={
-          <ProtectedRoute>
-            <Template2WithLogic />
-          </ProtectedRoute>
-        } />
-        <Route path='/profile' element={
-          <ProtectedRoute>
-            <Profile />
-          </ProtectedRoute>
-        } />
-        <Route path='/generate-suggestions' element={
-          <ProtectedRoute>
-            <SuggestionsPage />
-          </ProtectedRoute>
-        } />
-        <Route path='/details' element={
-          <ProtectedRoute>
-            <DetailsPage />
-          </ProtectedRoute>
-        } />
-        <Route path='/edit' element={
-          <ProtectedRoute>
-            <EditDetails />
-          </ProtectedRoute>
-        } />
-        <Route path='/login' element={<Login />} />
-        <Route path='/signup' element={<SignUp />} />
-      </Routes>
+      <Suspense fallback={<Loader />}>
+        <Routes>
+          <Route path='/' element={<Home />} />
+          <Route exact path='/templates' element={
+            <ProtectedRoute>
+              <TemplatePage />
+            </ProtectedRoute>
+          } />
+          <Route exact path='/template1' element={
+            <ProtectedRoute>
+              <Template1WithLogic />
+            </ProtectedRoute>
+          } />
+          <Route exact path='/template2' element={
+            <ProtectedRoute>
+              <Template2WithLogic />
+            </ProtectedRoute>
+          } />
+          <Route path='/profile' element={
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
+          } />
+
+          <Route path='/details' element={
+            <ProtectedRoute>
+              <DetailsPage />
+            </ProtectedRoute>
+          } />
+          <Route path='/edit' element={
+            <ProtectedRoute>
+              <EditDetails />
+            </ProtectedRoute>
+          } />
+          <Route path='/login' element={<Login />} />
+          <Route path='/signup' element={<SignUp />} />
+        </Routes>
+      </Suspense>
+
     </>
   )
 }
