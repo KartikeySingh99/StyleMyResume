@@ -1,9 +1,6 @@
 import { useNavigate } from "react-router-dom";
-import Template1 from "/resume1.png";
-import Template2 from "/resume2.png";
-import Template3 from "/template3.png";
-import Template4 from "/template4.webp";
-import Template5 from "/template.webp";
+import Template1 from "/resume1.webp";
+import Template2 from "/resume2.webp";
 import "./template.css";
 
 const TemplatePreview = () => {
