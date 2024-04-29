@@ -23,11 +23,15 @@ export const fetchUserData = createAsyncThunk('getUserDetails', async (userData)
 })
 
 export const editData = createAsyncThunk('editData', async ({ userID, userData }) => {
-    // console.log("Edit Data: ", userData);
-    // console.log(userID);
-    const data = await service.updateData(userID, { ...userData });
-    console.log(data);
-    return data;
+    try {
+        // console.log("Edit Data: ", userData);
+        // console.log(userID);
+        const data = await service.updateData(userID, { ...userData });
+        return data;
+    }
+    catch (error) {
+        console.log(error);
+    }
 })
 
 export const userSlice = createSlice({
@@ -40,8 +44,9 @@ export const userSlice = createSlice({
     },
     reducers: {
         saveData: (state, action) => {
+            // console.log("save data in slice=>", action.payload);
             service.createData(action.payload.userID, { ...action.payload.data });
-            state.user = action.payload
+            state.user.userData = action.payload
             state.loading = false;
         },
         userRegister: (state, action) => {

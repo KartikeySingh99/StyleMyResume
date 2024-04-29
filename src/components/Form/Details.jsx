@@ -86,42 +86,54 @@ const Details = ({ actionType }) => {
         {
             name: "Name",
             placeholder: "Enter Name",
-            type: "text"
+            type: "text",
+            isRequired: true,
+            validate: "Name is required!"
         },
         {
             name: "Email",
             placeholder: "Enter Email Id",
-            type: "email"
+            type: "email",
+            isRequired: true,
+            validate:"Email is required!"
         },
         {
             name: "PhoneNumber",
             placeholder: "Enter Phone Number",
-            type: "tel"
+            type: "tel",
+            isRequired: true,
+            validate:"Phone Number is required!"
         },
         {
             name: "Address",
             placeholder: "Enter Address Only State or City",
-            type: "text"
+            type: "text",
+            isRequired: false,
         },
         {
             name: "Designation",
             placeholder: "Enter Current Designation",
-            type: "text"
+            type: "text",
+            isRequired: false,
         },
         {
             name: "CareerObjective",
             placeholder: "Enter Your Carrer Objective",
-            type: "text"
+            type: "text",
+            isRequired: false,
         },
         {
             name: "LinkedIn",
             placeholder: "Paste Your LinkedIn Account Link",
-            type: "text"
+            type: "text",
+            isRequired: true,
+            validate:"LinkedIn url is required!"
         },
         {
             name: "Github",
             placeholder: "Paste Your Github Account Link",
-            type: "text"
+            type: "text",
+            isRequired: false,
         },
     ];
 
@@ -129,22 +141,26 @@ const Details = ({ actionType }) => {
         {
             name: "Course",
             placeholder: "Enter Your Course Name",
-            type: "text"
+            type: "text",
+            isRequired: true
         },
         {
             name: "InstituteName",
             placeholder: "Enter Institute/School Name",
-            type: "text"
+            type: "text",
+            isRequired: true
         },
         {
             name: "Year",
             placeholder: "Enter Year of Completion",
-            type: "text"
+            type: "text",
+            isRequired: true
         },
         {
             name: "Marks",
             placeholder: "Enter Your Marks",
-            type: "number"
+            type: "number",
+            isRequired: false
         }
     ];
 
@@ -152,12 +168,14 @@ const Details = ({ actionType }) => {
         {
             name: "Skill",
             type: "text",
-            placeholder: "Enter Your Skill"
+            placeholder: "Enter Your Skill",
+            isRequired: false
         },
         {
             name: "skillType",
             type: "select",
-            placeholder: "e.g Frontend Tools"
+            placeholder: "e.g Frontend Tools",
+            isRequired: false
         },
     ]
 
@@ -165,27 +183,32 @@ const Details = ({ actionType }) => {
         {
             name: "Project",
             type: "text",
-            placeholder: "Enter Project Name"
+            placeholder: "Enter Project Name",
+            isRequired: true
         },
         {
             name: "Link",
             type: "text",
-            placeholder: "Paste Your Project Link"
+            placeholder: "Paste Your Project Link",
+            isRequired: true
         },
         {
             name: "Year",
             type: "text",
-            placeholder: "Enter Year"
+            placeholder: "Enter Year",
+            isRequired: false
         },
         {
             name: "SkillsUsed",
             type: "text",
-            placeholder: "Enter Skills Used In This Project"
+            placeholder: "Enter Skills Used In This Project",
+            isRequired: true
         },
         {
             name: "Description",
             type: "text",
-            placeholder: "Enter Project Description"
+            placeholder: "Enter Project Description",
+            isRequired: true
         },
     ];
 
@@ -193,46 +216,35 @@ const Details = ({ actionType }) => {
         {
             name: "Company",
             placeholder: "Enter Company Name",
-            type: "text"
+            type: "text",
+            isRequired: true
         },
         {
             name: "Profile",
             placeholder: "Enter Profile",
-            type: "text"
+            type: "text",
+            isRequired: true
         },
         {
             name: "From",
             placeholder: "ex - dd/mm/yyyy",
-            type: "text"
+            type: "text",
+            isRequired: true
         },
         {
             name: "To",
             placeholder: "ex - dd/mm/yyyy or Present",
-            type: "text"
+            type: "text",
+            isRequired: true
         },
         {
             name: "Responsibilities",
             placeholder: "Enter key responsibilities",
-            type: "text"
+            type: "text",
+            isRequired: true
         },
-        // {
-        //     name:"Responsibilities1",
-        //     placeholder: "Enter key responsibilities",
-        //     type: "text"
-        // },
-        // {
-        //     name:"Responsibilities2",
-        //     placeholder: "Enter key responsibilities",
-        //     type: "text"
-        // },
-        // {
-        //     name:"Responsibilities3",
-        //     placeholder: "Enter key responsibilities",
-        //     type: "text"
-        // },
     ]
 
-    // console.log(detailedData);
 
     const handlePersonalData = (data) => {
         setPersonalDetails(data)
@@ -304,7 +316,7 @@ const Details = ({ actionType }) => {
 
     const handleAllDetails = (data) => {
         if (actionType === "create") {
-            dispatch(saveData({ userID: userData?.$id, data }));
+            dispatch(saveData({ userID: userData?.userId, data }));
             navigate("/profile");
         }
         else if (actionType === "edit") {
@@ -406,7 +418,7 @@ const Details = ({ actionType }) => {
                 <div className='block lg:hidden container shadow-2xl border bg-white rounded-full fixed right-2 bottom-4 w-fit animate-bounce'>
                     <button className='text-sm font-semibold flex items-center justify-center' onClick={() => setOpen(true)}> <img src={Review} className='object-contain' width={50} alt="" /> </button>
                 </div>
-                    <ReviewPopup formData={detailedData} open={open} setOpen={setOpen} />
+                <ReviewPopup formData={detailedData} open={open} setOpen={setOpen} />
             </>
     )
 }

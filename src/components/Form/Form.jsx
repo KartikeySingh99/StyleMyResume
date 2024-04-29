@@ -16,8 +16,8 @@ const Form = ({ sectionName, label, defaultValues = {}, formFields, dynamicField
 
     const fieldRef = useRef([]);
 
-    const { control, handleSubmit } = useForm({ defaultValues })
-    const { fields, append, remove, swap,update } = useFieldArray({ control, name: `${label}Array` })
+    const { control, handleSubmit, formState: { errors } } = useForm({ defaultValues })
+    const { fields, append, remove, swap, update } = useFieldArray({ control, name: `${label}Array` })
 
     const [expanded, setExpanded] = useState(0)
     const [isFocused, setIsFocused] = useState(false);
@@ -119,14 +119,15 @@ const Form = ({ sectionName, label, defaultValues = {}, formFields, dynamicField
                                                                 key={j}
                                                                 name={`${label}Array[${i}].${item.name}`}
                                                                 control={control}
+                                                                rules={{ required: item.isRequired }}
                                                                 render={({ field }) => item.name === "Responsibilities" || item.name === "Description" ?
                                                                     <div className='relative group'>
-                                                                        <textarea className={'px-3 py-4 border border-gray-300 rounded-md hover:border-black' + `${isFocused ? 'outline outline-primary border-primary' : ""}`} placeholder={item.placeholder} onFocus={handleFocus} onBlurCapture={handleBlur} name={item.name} {...field} id="responsibility" cols="40" rows="4" />
+                                                                        <textarea className={'px-3 py-4 border border-gray-300 rounded-md hover:border-black' + `${isFocused ? 'outline outline-primary border-primary' : ""}`} placeholder={item.placeholder} required={item.isRequired} onFocus={handleFocus} onBlurCapture={handleBlur} name={item.name} {...field} id="responsibility" cols="40" rows="4" />
                                                                         <label htmlFor="responsibility"
                                                                             className={'absolute bg-white px-3 text-sm text-primary -top-3 left-2 ' + `${isFocused ? 'text-primary' : 'text-gray-500'}`}
                                                                         >Description</label>
                                                                     </div> :
-                                                                    <TextField type={item.type} {...field} className='self-start' name={item.name} label={item.name} placeholder={item.placeholder} variant="outlined" margin='dense' />}
+                                                                    <TextField type={item.type} {...field} className='self-start' name={item.name} label={item.name} placeholder={item.placeholder} required={item.isRequired} variant="outlined" margin='dense' />}
                                                             />
                                                         ))
                                                     }
@@ -145,12 +146,13 @@ const Form = ({ sectionName, label, defaultValues = {}, formFields, dynamicField
 
                         {
                             formFields && formFields.map((fields, j) => (
-                                <Controller
-                                    key={j}
-                                    name={fields.name}
-                                    control={control}
-                                    render={({ field }) => <TextField type={fields.type} {...field} name={fields.name} label={fields.name} placeholder={fields.placeholder} variant="outlined" margin='dense' />}
-                                />
+                                    <Controller
+                                        key={j}
+                                        name={fields.name}
+                                        control={control}
+                                        rules={{ required: fields.isRequired }}
+                                        render={({ field }) => <TextField type={fields.type} {...field} name={fields.name} label={fields.name} placeholder={fields.placeholder} required={fields.isRequired} variant="outlined" margin='dense' />}
+                                    />
                             ))
                         }
                     </div>

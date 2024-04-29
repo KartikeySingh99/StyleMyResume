@@ -12,7 +12,6 @@ export const authSlice = createSlice({
     },
     reducers: {
         register: (state, action) => {
-            console.log(action.payload);
             state.loading = false
             if (action.payload.code === 400) {
                 state.error = action.payload.error;
@@ -22,6 +21,7 @@ export const authSlice = createSlice({
             else {
                 state.isCreated = true;
                 state.isAuthenticated = true;
+                state.userData = action.payload
                 state.error = null
             }
         },
