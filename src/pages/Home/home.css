@@ -32,5 +32,5 @@
 }
 
 .promotional-list>li:hover .list-after {
-    transform: translateY(0);
+    transform: translateY(50%);
 }

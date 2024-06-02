@@ -3,10 +3,11 @@
 }
 
 .template button {
-    display: none;
+    opacity: 0;
     transition: all;
-    transition-duration: 0.8s;
-    transition-timing-function: step-start;
+    transition-duration: 0.3s;
+    transition-timing-function: ease-in-out;
+    transform: translateY(12px);
 }
 
 .template::after {
@@ -27,5 +28,7 @@
 }
 
 .template:hover button {
-    display: block;
+    opacity: 1;
+    transform: translateY(0);
+    box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.392);
 }

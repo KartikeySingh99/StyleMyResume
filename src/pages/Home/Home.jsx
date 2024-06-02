@@ -56,8 +56,8 @@ const Home = () => {
                 <ul className="promotional-list mt-12 flex items-center justify-center lg:justify-evenly flex-col lg:flex-row gap-y-6 gap-x-4 w-full">
                     <li className="flex items-center justify-center flex-col gap-y-4  px-4 py-6 hover:cursor-pointer w-[18rem] h-[20rem]">
                         <div className="list-after text-white px-4 py-6">
-                            <h1 className="text-xl font-bold">Choose Your Template</h1>
-                            <p className="text-sm py-4">Lorem ipsum dolor sit amet consectetur adipisicing elit. Expedita ab numquam eveniet laboriosam esse nulla tempora vitae eos, similique soluta.</p>
+                            <h1 className="text-xl font-bold underline-offset-8 underline">Choose Your Template</h1>
+                            <p className="text-sm py-4">Choose from wide variety of templates that are ATS Friendly.</p>
                         </div>
                         <div className="w-44 h-44 md:w-36 md:h-36 rounded-full border-4 flex items-center justify-center">
                             <img src={featured3} alt="" />
@@ -66,8 +66,8 @@ const Home = () => {
                     </li>
                     <li className="flex items-center justify-center flex-col gap-y-4  px-4 py-6 hover:cursor-pointer w-[18rem] h-[20rem]">
                         <div className="list-after text-white px-4 py-6">
-                            <h1 className="text-xl font-bold">Choose Your Template</h1>
-                            <p className="text-sm py-4">Lorem ipsum dolor sit amet consectetur adipisicing elit. Expedita ab numquam eveniet laboriosam esse nulla tempora vitae eos, similique soluta.</p>
+                            <h1 className="text-xl font-bold underline-offset-8 underline">Respresent Your Skills</h1>
+                            <p className="text-sm py-4">List your technical as well as soft skills.</p>
                         </div>
                         <div className="w-44 h-44 md:w-36 md:h-36 rounded-full border-4  flex items-center justify-center">
                             <img src={featured2} alt="" />
@@ -76,8 +76,8 @@ const Home = () => {
                     </li>
                     <li className="flex items-center justify-center flex-col gap-y-4 px-4 py-6 hover:cursor-pointer w-[18rem] h-[20rem]">
                         <div className="list-after text-white px-4 py-6">
-                            <h1 className="text-xl font-bold">Choose Your Template</h1>
-                            <p className="text-sm py-4">Lorem ipsum dolor sit amet consectetur adipisicing elit. Expedita ab numquam eveniet laboriosam esse nulla tempora vitae eos, similique soluta.</p>
+                            <h1 className="text-xl font-bold underline-offset-8 underline">Easy Download</h1>
+                            <p className="text-sm py-4">Download your generated resume within a single click.</p>
                         </div>
                         <div className="w-44 h-44 md:w-36 md:h-36 rounded-full border-4 flex items-center justify-center">
                             <img src={featured1} className="" alt="" />
