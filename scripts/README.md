@@ -40,12 +40,19 @@ go in the web app's `.env` (anything there is `VITE_`-prefixed and ships to the
 browser):
 
 ```bash
-export APPWRITE_ENDPOINT=https://cloud.appwrite.io/v1
-export APPWRITE_PROJECT_ID=...
-export APPWRITE_DATABASE_ID=...
-export APPWRITE_COLLECTION_ID=...
-export APPWRITE_API_KEY=...   # needs documents.read + documents.write
+# Reuse the endpoint and project id from the web app's own .env — those are
+# already known to work. Cloud projects live on regional hosts, so the bare
+# cloud.appwrite.io host often fails with `api_key_invalid`.
+export APPWRITE_ENDPOINT="$(grep VITE_APPWRITE_URL ../.env | cut -d= -f2-)"
+export APPWRITE_PROJECT_ID="$(grep VITE_APPWRITE_PROJECT_ID ../.env | cut -d= -f2-)"
+export APPWRITE_DATABASE_ID="$(grep VITE_APPWRITE_DATABASE_ID ../.env | cut -d= -f2-)"
+export APPWRITE_COLLECTION_ID="$(grep VITE_APPWRITE_COLLECTION_ID ../.env | cut -d= -f2-)"
+export APPWRITE_API_KEY=...   # server key; needs documents.read + documents.write
 ```
+
+The API key is the only value you type by hand. Create it under
+**Settings -> API Keys** in the *same* project — a key from another project
+fails with `api_key_invalid`, which is an identity error, not a scope error.
 
 ## 3. Run it
 
