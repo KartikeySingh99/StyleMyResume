@@ -42,7 +42,7 @@ const Template2 = ({ componentRef, user, margin, setMargin, fontStyle, setFontSt
                         <div className="mt-4">
                             <h3 className="text-lg font-semibold mb-2">Experience</h3>
                             {
-                                user?.userData?.expirienceDetails?.map((data, index) => (
+                                user?.userData?.experienceDetails?.map((data, index) => (
 
                                     <div key={index} className="my-2">
                                         <h4 className="text-base font-semibold">{data.Company}</h4>

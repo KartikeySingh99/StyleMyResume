@@ -1,0 +1,99 @@
+# Data model migration — one resume per user → many
+
+Moves resume documents off "document id = Appwrite user id" and onto
+`ID.unique()` ids found via an indexed owner attribute. That cap was the reason
+an account could only ever hold one resume.
+
+**Order matters.** Step 1 must happen *before* you deploy the new web build,
+because owner-scoped lookups fail without the index.
+
+---
+
+## 1. Schema changes (Appwrite console)
+
+In your resumes collection:
+
+| Action | Attribute | Type | Required | Notes |
+| --- | --- | --- | --- | --- |
+| **Add index** | `User_ID` | key, ASC | — | name it `userId_idx`. **Required** — `Query.equal` errors without it. |
+| **Create** | `experienceDetails` | String (size ≥ old attribute) | No | corrected spelling of `expirienceDetails` |
+| **Create** | `title` | String (255) | No | lets a picker tell resumes apart |
+| **Keep for now** | `expirienceDetails` | — | — | delete only after step 4 |
+
+`User_ID` is kept as the owner attribute rather than renamed to `userId`:
+Appwrite cannot rename an attribute in place, so renaming would mean a second
+create-backfill-drop cycle for no functional gain. It already exists and is
+already populated on every document.
+
+Also set the collection to **Document security = enabled** so per-document
+permissions take effect.
+
+## 2. Install and configure
+
+```bash
+cd scripts
+npm install
+```
+
+Export the credentials — these are **server-side only**. The API key must never
+go in the web app's `.env` (anything there is `VITE_`-prefixed and ships to the
+browser):
+
+```bash
+export APPWRITE_ENDPOINT=https://cloud.appwrite.io/v1
+export APPWRITE_PROJECT_ID=...
+export APPWRITE_DATABASE_ID=...
+export APPWRITE_COLLECTION_ID=...
+export APPWRITE_API_KEY=...   # needs documents.read + documents.write
+```
+
+## 3. Run it
+
+Always dry-run first — it writes nothing and prints exactly what would change:
+
+```bash
+npm run migrate:dry
+```
+
+Then apply:
+
+```bash
+npm run migrate
+```
+
+Per document the script will:
+
+1. copy `expirienceDetails` → `experienceDetails` (only when the new attribute
+   is blank, so it never overwrites newer content);
+2. set `User_ID` from `$id` if missing (old documents identified the owner by
+   document id alone);
+3. set `title` to "My Resume" if blank;
+4. set owner-only document permissions — this closes the gap where documents
+   created before the security fix fell back to collection-level rules.
+
+It is **idempotent**: re-running reports `already migrated` and writes nothing.
+Documents with no recoverable owner are skipped and listed, never guessed.
+
+If replacing permissions would remove an entry that isn't an owner permission,
+the script prints what it removed rather than dropping it silently. Check the
+dry-run output for a "Permissions replaced" section before applying.
+
+## 4. Verify, then clean up
+
+1. Load the app and confirm an existing resume renders, including the
+   Experience section.
+2. Edit and save it — this writes through the new document-id path.
+3. Only then delete the `expirienceDetails` attribute in the console.
+
+Until step 4 the app reads **either** spelling (`src/slices/userSlice.jsx`
+falls back to the old name), so old and new documents both work. That fallback
+is what makes the deploy safe to do before the backfill finishes — remove it
+once the old attribute is gone.
+
+## Rollback
+
+The migration only adds data; it does not delete the old attribute. To roll
+back, redeploy the previous web build — it reads `expirienceDetails`, which is
+still present and still populated. The one non-additive change is document
+permissions; if you need the old behaviour, re-grant access at the collection
+level and disable document security.

@@ -48,7 +48,7 @@ const Details = ({ actionType }) => {
     const [value, setValue] = useState(0);
     const [detailedData, setDetailedData] = useState({});
     const [educationalDetails, setEducationDetails] = useState([]);
-    const [expirienceDetails, setExperienceDetails] = useState([]);
+    const [experienceDetails, setExperienceDetails] = useState([]);
     const [skillDetails, setSkillDetails] = useState([]);
     const [personalDetails, setPersonalDetails] = useState({});
     const [projectDetails, setProjectDetails] = useState([]);
@@ -69,7 +69,7 @@ const Details = ({ actionType }) => {
         if (user && actionType === "edit") {
             setPersonalDetails(user?.userData?.personalDetails);
             setEducationDetails(user?.userData?.educationalDetails);
-            setExperienceDetails(user?.userData?.expirienceDetails);
+            setExperienceDetails(user?.userData?.experienceDetails);
             setProjectDetails(user?.userData?.projectDetails);
             setSkillDetails(user?.userData?.skillDetails);
             setDetailedData(user?.userData)
@@ -279,7 +279,7 @@ const Details = ({ actionType }) => {
     }
 
     const handleExperienceData = (data) => {
-        commitSection(data.experienceArray, experienceFields, "expirienceDetails", setExperienceDetails, 3);
+        commitSection(data.experienceArray, experienceFields, "experienceDetails", setExperienceDetails, 3);
     }
 
     const handleSkillData = (data) => {
@@ -295,9 +295,11 @@ const Details = ({ actionType }) => {
 
     const handleAllDetails = (data) => {
         // Only navigate once the write actually succeeded.
+        // Edits target the resume's own document id; `userData.$id` is the account id,
+        // which only doubled as the document id in the pre-migration model.
         const action = actionType === "create"
             ? saveUserData({ userID: userData?.userId ?? userData?.$id, data })
-            : editData({ userID: userData?.$id, userData: data });
+            : editData({ documentID: user?.userData?.$id, userData: data });
 
         dispatch(action)
             .unwrap()
@@ -366,7 +368,7 @@ const Details = ({ actionType }) => {
                                 sectionName='Experience'
                                 label='experience'
                                 dynamicFields={experienceFields}
-                                defaultValues={{ experienceArray: expirienceDetails }}
+                                defaultValues={{ experienceArray: experienceDetails }}
                                 onSubmit={handleExperienceData}
                                 value={value}
                                 setValue={setValue}

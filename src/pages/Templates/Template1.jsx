@@ -57,13 +57,13 @@ const Template1 = ({ componentRef, user, margin, fontStyle, setFontStyle, setMar
                                 }
                             </div>
                             {
-                                user?.userData?.expirienceDetails &&
+                                user?.userData?.experienceDetails &&
                                 <div className="px-4">
                                     <h1 className="sm:text-lg text-base font-bold mt-2 uppercase">Experience</h1>
                                     <div className="h-[1px] w-full bg-black mb-2"></div>
                                     {/** Section */}
                                     {
-                                        user?.userData?.expirienceDetails.map((data, i) => (
+                                        user?.userData?.experienceDetails.map((data, i) => (
 
                                             <div key={i} className="my-2">
                                                 <div className="flex items-start justify-between">

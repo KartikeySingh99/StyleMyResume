@@ -24,7 +24,7 @@ const Profile = () => {
 
     const [personalData, setPersonalData] = useState({});
     const [educationData, setEducationData] = useState([]);
-    const [expirienceData, setExpirienceData] = useState([]);
+    const [experienceData, setExperienceData] = useState([]);
     const [projecData, setProjectData] = useState([]);
     const [skills, setSkills] = useState([]);
     const [filteredSkills, setFilteredSkills] = useState([]);
@@ -44,7 +44,7 @@ const Profile = () => {
         if (user) {
             setPersonalData(user?.userData?.personalDetails ?? {})
             setEducationData(user?.userData?.educationalDetails ?? [])
-            setExpirienceData(user?.userData?.expirienceDetails ?? [])
+            setExperienceData(user?.userData?.experienceDetails ?? [])
             setProjectData(user?.userData?.projectDetails ?? [])
             setSkills(user?.userData?.skillDetails ?? [])
         }
@@ -83,7 +83,7 @@ const Profile = () => {
 
         switch (sectionName) {
             case 'experience':
-                expirienceData.forEach((data, index) => {
+                experienceData.forEach((data, index) => {
                     const points = toLines(data?.Responsibilities).map((point, i) => `${i + 1}. ${point}`).join('\n');
                     textData += `Experience ${index + 1}:\nPosition: ${data?.Profile ?? ""}\nResponsibilities:\n${points}\n\n`;
                 });
@@ -181,14 +181,14 @@ const Profile = () => {
                                             <p className="text-gray-700" id="careerObjective">{personalData?.CareerObjective}</p>
                                             <div className="flex items-end justify-start gap-x-4  mt-6 mb-4">
                                                 <h2 className="text-xl font-bold">Experience</h2>
-                                                {expirienceData?.length > 0 ?
+                                                {experienceData?.length > 0 ?
                                                     <button type="button" className="hover:cursor-pointer flex items-center gap-x-1 text-white rounded-md text-sm p-2 bg-color1" onClick={() => { setSectionName("experience"); GeneratePlainTextData("experience") }}> <span><AutoAwesomeIcon fontSize="small" /></span> Get AI Suggestions</button>
                                                     :
                                                     <span>Add Your Experience</span>
                                                 }
                                             </div>
                                             {
-                                                expirienceData && expirienceData.map((data, i) => (
+                                                experienceData && experienceData.map((data, i) => (
                                                     <div key={i} className="mb-6">
                                                         <div className="flex justify-between flex-wrap gap-2 w-full">
                                                             <p className="text-gray-700 font-bold">{data.Profile} | {data?.Company}</p>

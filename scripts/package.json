@@ -1,0 +1,14 @@
+{
+  "name": "stylemyresume-scripts",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "One-off maintenance scripts. Separate from the web app so the server SDK and API key never reach the browser bundle.",
+  "scripts": {
+    "migrate:dry": "node migrate-resumes.mjs --dry-run",
+    "migrate": "node migrate-resumes.mjs"
+  },
+  "dependencies": {
+    "node-appwrite": "^13.0.0"
+  }
+}

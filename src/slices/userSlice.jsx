@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import service from "../appwrite/database";
+import service, { DEFAULT_RESUME_TITLE } from "../appwrite/database";
 
 /** Accepts either an Appwrite session (`userId`) or an account object (`$id`). */
 const resolveUserID = (userData) => {
@@ -19,61 +19,94 @@ const parseSection = (value, fallback) => {
     }
 };
 
-/** Turns a raw Appwrite document into the shape the UI expects. */
+/**
+ * Turns a raw Appwrite document into the shape the UI expects.
+ * `expirienceDetails` is the pre-migration spelling — documents written before
+ * the backfill still carry it, so both names are accepted on read.
+ */
 const normalizeDocument = (document = {}) => {
-    const { personalDetails, educationalDetails, expirienceDetails, skillDetails, projectDetails, ...rest } =
-        document;
+    const {
+        personalDetails,
+        educationalDetails,
+        experienceDetails,
+        expirienceDetails,
+        skillDetails,
+        projectDetails,
+        ...rest
+    } = document;
 
     return {
         ...rest,
+        title: rest.title || DEFAULT_RESUME_TITLE,
         personalDetails: parseSection(personalDetails, {}),
         educationalDetails: parseSection(educationalDetails, []),
-        expirienceDetails: parseSection(expirienceDetails, []),
+        experienceDetails: parseSection(experienceDetails ?? expirienceDetails, []),
         skillDetails: parseSection(skillDetails, []),
         projectDetails: parseSection(projectDetails, []),
     };
+};
+
+/** Keeps `resumes` and the active resume in sync after any write. */
+const setActiveResume = (state, resume) => {
+    state.activeResumeId = resume?.$id ?? null;
+    // `user.userData` is the active resume; the screens read it directly.
+    state.user.userData = resume ?? undefined;
+};
+
+const upsertResume = (state, resume) => {
+    const index = state.resumes.findIndex((item) => item.$id === resume.$id);
+    if (index === -1) state.resumes.unshift(resume);
+    else state.resumes[index] = resume;
+    setActiveResume(state, resume);
 };
 
 export const fetchUserData = createAsyncThunk(
     "user/fetchUserData",
     async (userData, { rejectWithValue }) => {
         const userID = resolveUserID(userData);
-        // Previously this returned undefined, and the reducer then destructured
-        // undefined — a TypeError that blanked the whole page.
         if (!userID) return rejectWithValue({ error: "Not signed in.", code: 401 });
 
-        const data = await service.getData(userID);
-        if (!data || data.error) {
-            return rejectWithValue({ error: data?.error ?? "No data found!", code: data?.code ?? 404 });
+        const result = await service.listResumes(userID);
+        if (result?.error) {
+            return rejectWithValue({ error: result.error, code: result.code ?? 404 });
         }
-        return data;
+        return result.documents ?? [];
     }
 );
 
 export const saveUserData = createAsyncThunk(
     "user/saveUserData",
-    async ({ userID, data }, { rejectWithValue }) => {
+    async ({ userID, data, title }, { rejectWithValue }) => {
         if (!userID) return rejectWithValue("Not signed in.");
-        try {
-            // Side effects belong here, not in a reducer.
-            return await service.createData(userID, data);
-        } catch (error) {
-            return rejectWithValue(
-                error?.response?.message ?? error?.message ?? "Could not save your details."
-            );
+        const result = await service.createResume(userID, data, title ?? DEFAULT_RESUME_TITLE);
+        if (!result || result.error) {
+            return rejectWithValue(result?.error ?? "Could not save your details.");
         }
+        return result;
     }
 );
 
 export const editData = createAsyncThunk(
     "user/editData",
-    async ({ userID, userData }, { rejectWithValue }) => {
-        if (!userID) return rejectWithValue("Not signed in.");
-        const data = await service.updateData(userID, userData);
-        if (!data || data.error) {
-            return rejectWithValue(data?.error ?? "Could not save your changes.");
+    async ({ documentID, userData, title }, { rejectWithValue }) => {
+        // Document id, not user id — the two were interchangeable only in the old model.
+        if (!documentID) return rejectWithValue("Missing resume id.");
+        const result = await service.updateResume(documentID, userData, title);
+        if (!result || result.error) {
+            return rejectWithValue(result?.error ?? "Could not save your changes.");
         }
-        return data;
+        return result;
+    }
+);
+
+export const removeResume = createAsyncThunk(
+    "user/removeResume",
+    async (documentID, { rejectWithValue }) => {
+        const result = await service.deleteResume(documentID);
+        if (!result || result.error) {
+            return rejectWithValue(result?.error ?? "Could not delete this resume.");
+        }
+        return documentID;
     }
 );
 
@@ -81,6 +114,8 @@ export const userSlice = createSlice({
     name: "user",
     initialState: {
         user: {},
+        resumes: [],
+        activeResumeId: null,
         loading: false,
         isUpdated: false,
         error: null,
@@ -88,8 +123,14 @@ export const userSlice = createSlice({
     reducers: {
         resetUser: (state) => {
             state.user = {};
+            state.resumes = [];
+            state.activeResumeId = null;
             state.error = null;
             state.isUpdated = false;
+        },
+        selectResume: (state, action) => {
+            const resume = state.resumes.find((item) => item.$id === action.payload);
+            if (resume) setActiveResume(state, resume);
         },
     },
     extraReducers: (builder) => {
@@ -100,7 +141,11 @@ export const userSlice = createSlice({
             .addCase(fetchUserData.fulfilled, (state, action) => {
                 state.loading = false;
                 state.error = null;
-                state.user.userData = normalizeDocument(action.payload);
+                state.resumes = action.payload.map(normalizeDocument);
+                // Most recently updated wins until there is a resume picker.
+                const active =
+                    state.resumes.find((item) => item.$id === state.activeResumeId) ?? state.resumes[0];
+                setActiveResume(state, active);
             })
             .addCase(fetchUserData.rejected, (state, action) => {
                 state.loading = false;
@@ -113,7 +158,7 @@ export const userSlice = createSlice({
             .addCase(saveUserData.fulfilled, (state, action) => {
                 state.loading = false;
                 state.isUpdated = true;
-                state.user.userData = normalizeDocument(action.payload);
+                upsertResume(state, normalizeDocument(action.payload));
             })
             .addCase(saveUserData.rejected, (state, action) => {
                 state.loading = false;
@@ -126,14 +171,23 @@ export const userSlice = createSlice({
             .addCase(editData.fulfilled, (state, action) => {
                 state.loading = false;
                 state.isUpdated = true;
-                state.user.userData = normalizeDocument(action.payload);
+                upsertResume(state, normalizeDocument(action.payload));
             })
             .addCase(editData.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload ?? "Could not save your changes.";
+            })
+            .addCase(removeResume.fulfilled, (state, action) => {
+                state.resumes = state.resumes.filter((item) => item.$id !== action.payload);
+                if (state.activeResumeId === action.payload) {
+                    setActiveResume(state, state.resumes[0]);
+                }
+            })
+            .addCase(removeResume.rejected, (state, action) => {
+                state.error = action.payload ?? "Could not delete this resume.";
             });
     },
 });
 
-export const { resetUser } = userSlice.actions;
+export const { resetUser, selectResume } = userSlice.actions;
 export default userSlice.reducer;
