@@ -1,38 +1,81 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import service from "../appwrite/database";
 
+/** Accepts either an Appwrite session (`userId`) or an account object (`$id`). */
+const resolveUserID = (userData) => {
+    if (!userData || typeof userData !== "object") return null;
+    if (userData.userId) return userData.userId;
+    if (userData.$id) return userData.$id;
+    return null;
+};
 
-export const fetchUserData = createAsyncThunk('getUserDetails', async (userData) => {
-    if ('userId' in userData) {
-        let userID = userData.userId;
-        const data = await service.getData(userID);
-        if (data) {
-            return data;
-        }
-    }
-    else if ('status' in userData) {
-        const data = await service.getData(userData.$id);
-        // console.log(data);
-        if (data) {
-            return data;
-        }
-    }
-    // else{
-    //     return "No Data Available!"
-    // }
-})
-
-export const editData = createAsyncThunk('editData', async ({ userID, userData }) => {
+const parseSection = (value, fallback) => {
+    if (value === null || value === undefined) return fallback;
+    if (typeof value !== "string") return value;
     try {
-        // console.log("Edit Data: ", userData);
-        // console.log(userID);
-        const data = await service.updateData(userID, { ...userData });
+        return JSON.parse(value);
+    } catch {
+        return fallback;
+    }
+};
+
+/** Turns a raw Appwrite document into the shape the UI expects. */
+const normalizeDocument = (document = {}) => {
+    const { personalDetails, educationalDetails, expirienceDetails, skillDetails, projectDetails, ...rest } =
+        document;
+
+    return {
+        ...rest,
+        personalDetails: parseSection(personalDetails, {}),
+        educationalDetails: parseSection(educationalDetails, []),
+        expirienceDetails: parseSection(expirienceDetails, []),
+        skillDetails: parseSection(skillDetails, []),
+        projectDetails: parseSection(projectDetails, []),
+    };
+};
+
+export const fetchUserData = createAsyncThunk(
+    "user/fetchUserData",
+    async (userData, { rejectWithValue }) => {
+        const userID = resolveUserID(userData);
+        // Previously this returned undefined, and the reducer then destructured
+        // undefined — a TypeError that blanked the whole page.
+        if (!userID) return rejectWithValue({ error: "Not signed in.", code: 401 });
+
+        const data = await service.getData(userID);
+        if (!data || data.error) {
+            return rejectWithValue({ error: data?.error ?? "No data found!", code: data?.code ?? 404 });
+        }
         return data;
     }
-    catch (error) {
-        console.log(error);
+);
+
+export const saveUserData = createAsyncThunk(
+    "user/saveUserData",
+    async ({ userID, data }, { rejectWithValue }) => {
+        if (!userID) return rejectWithValue("Not signed in.");
+        try {
+            // Side effects belong here, not in a reducer.
+            return await service.createData(userID, data);
+        } catch (error) {
+            return rejectWithValue(
+                error?.response?.message ?? error?.message ?? "Could not save your details."
+            );
+        }
     }
-})
+);
+
+export const editData = createAsyncThunk(
+    "user/editData",
+    async ({ userID, userData }, { rejectWithValue }) => {
+        if (!userID) return rejectWithValue("Not signed in.");
+        const data = await service.updateData(userID, userData);
+        if (!data || data.error) {
+            return rejectWithValue(data?.error ?? "Could not save your changes.");
+        }
+        return data;
+    }
+);
 
 export const userSlice = createSlice({
     name: "user",
@@ -40,21 +83,14 @@ export const userSlice = createSlice({
         user: {},
         loading: false,
         isUpdated: false,
-        error: null
+        error: null,
     },
     reducers: {
-        saveData: (state, action) => {
-            // console.log("save data in slice=>", action.payload);
-            service.createData(action.payload.userID, { ...action.payload.data });
-            state.user.userData = action.payload
-            state.loading = false;
-        },
-        userRegister: (state, action) => {
-            state.user.isAuthenticated = action.payload;
-        },
         resetUser: (state) => {
             state.user = {};
-        }
+            state.error = null;
+            state.isUpdated = false;
+        },
     },
     extraReducers: (builder) => {
         builder
@@ -63,40 +99,41 @@ export const userSlice = createSlice({
             })
             .addCase(fetchUserData.fulfilled, (state, action) => {
                 state.loading = false;
-                if (action.payload?.code === 404) {
-                    state.error = action.payload.error;
-                }
-                else {
-                    const { personalDetails, educationalDetails, expirienceDetails, skillDetails, projectDetails, ...data } = action.payload;
-                    state.user.userData = {
-                        personalDetails: JSON.parse(personalDetails),
-                        educationalDetails: JSON.parse(educationalDetails),
-                        expirienceDetails: JSON.parse(expirienceDetails),
-                        skillDetails: JSON.parse(skillDetails),
-                        projectDetails: JSON.parse(projectDetails),
-                        ...data
-                    }
-                }
+                state.error = null;
+                state.user.userData = normalizeDocument(action.payload);
             })
-            .addCase(fetchUserData.rejected, (state) => {
-                state.error = "cannot fetch data";
-                // state.user = null;
+            .addCase(fetchUserData.rejected, (state, action) => {
                 state.loading = false;
+                state.error = action.payload?.error ?? "Cannot fetch data";
+            })
+            .addCase(saveUserData.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(saveUserData.fulfilled, (state, action) => {
+                state.loading = false;
+                state.isUpdated = true;
+                state.user.userData = normalizeDocument(action.payload);
+            })
+            .addCase(saveUserData.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload ?? "Could not save your details.";
             })
             .addCase(editData.pending, (state) => {
                 state.loading = true;
+                state.error = null;
             })
             .addCase(editData.fulfilled, (state, action) => {
-                state.user.userData = action.payload;
                 state.loading = false;
                 state.isUpdated = true;
+                state.user.userData = normalizeDocument(action.payload);
             })
             .addCase(editData.rejected, (state, action) => {
                 state.loading = false;
-                state.error = action.error;
-            })
-    }
-})
+                state.error = action.payload ?? "Could not save your changes.";
+            });
+    },
+});
 
-export const { saveData, fetchData, resetUser } = userSlice.actions;
+export const { resetUser } = userSlice.actions;
 export default userSlice.reducer;

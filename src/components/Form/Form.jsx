@@ -59,6 +59,16 @@ const Form = ({ sectionName, label, defaultValues = {}, formFields, dynamicField
     }
 
 
+    /**
+     * `append()` with no argument created rows with no keys at all, which were then
+     * saved and later crashed the templates on `undefined.split("\n")`.
+     */
+    const handleAppendRow = () => {
+        const blankRow = Object.fromEntries((dynamicFields ?? []).map((field) => [field.name, ""]));
+        append(blankRow);
+        setExpanded(fields.length);
+    };
+
     const handleFocus = () => {
         setIsFocused(true);
     };
@@ -75,7 +85,7 @@ const Form = ({ sectionName, label, defaultValues = {}, formFields, dynamicField
                     <h1 className='text-lg font-semibold'>{sectionName}</h1>
                     {
                         label === "educationDetails" || label === "skills" || label === "projects" || label === "experience" ?
-                            <div className='hover:cursor-pointer' onClick={() => append()}>
+                            <div className='hover:cursor-pointer' onClick={handleAppendRow}>
                                 <Tooltip title="Add More" placement='right' arrow>
                                     <AddIcon fontSize='medium' />
                                 </Tooltip>

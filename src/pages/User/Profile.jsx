@@ -10,6 +10,8 @@ import Loader from "../../components/Loader/Loader"
 import useMakeURLShort from "../../hooks/useMakeURLShort";
 import SuggestionBot from "../../components/SuggestionBot/SuggestionBot";
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
+import { toLines } from "../../utils/text";
+import { safeUrl } from "../../utils/url";
 
 const Profile = () => {
     const dispatch = useDispatch();
@@ -64,18 +66,15 @@ const Profile = () => {
     // }
 
     useEffect(() => {
-        let filteredSkills = {};
-        skills.forEach((data) => {
-            if (!(data.skillType in filteredSkills)) {
-                filteredSkills[data.skillType] = [];
-                filteredSkills[data.skillType].push(data.Skill)
-            }
-            else {
-                filteredSkills[data.skillType].push(data.Skill)
-            }
+        const grouped = {};
+        (Array.isArray(skills) ? skills : []).forEach((data) => {
+            const skill = String(data?.Skill ?? "").trim();
+            if (!skill) return;
+            const group = String(data?.skillType ?? "").trim() || "Other";
+            grouped[group] = grouped[group] ?? [];
+            grouped[group].push(skill);
         })
-        setFilteredSkills(filteredSkills);
-        // console.log(filteredSkills);
+        setFilteredSkills(grouped);
     }, [skills])
 
     const GeneratePlainTextData = (sectionName) => {
@@ -84,29 +83,23 @@ const Profile = () => {
 
         switch (sectionName) {
             case 'experience':
-                console.log("experience");
-                expirienceData && expirienceData.forEach((data, index) => {
-                    textData += `Experience ${index + 1}:
-                    Position: ${data.Profile}
-                    Responsibilities:
-                    ${data.Responsibilities.split('\n').map((point, i) => `${i + 1}. ${point}`)}`
+                expirienceData.forEach((data, index) => {
+                    const points = toLines(data?.Responsibilities).map((point, i) => `${i + 1}. ${point}`).join('\n');
+                    textData += `Experience ${index + 1}:\nPosition: ${data?.Profile ?? ""}\nResponsibilities:\n${points}\n\n`;
                 });
+                setSectionData(textData.trim())
                 setOpen(true)
-                setSectionData(textData)
                 break;
-            case 'project': console.log("project");
-                projecData && projecData.forEach((data, index) => {
-                    textData += `Project ${index + 1}:
-                Project Name: ${data.Project}
-                Skills: ${data.SkillsUsed}
-                Description: 
-                ${data.Description.split('\n').map((point, i) => `${i + 1}. ${point}`)}
-                `
+            case 'project':
+                projecData.forEach((data, index) => {
+                    const points = toLines(data?.Description).map((point, i) => `${i + 1}. ${point}`).join('\n');
+                    textData += `Project ${index + 1}:\nProject Name: ${data?.Project ?? ""}\nSkills: ${data?.SkillsUsed ?? ""}\nDescription:\n${points}\n\n`;
                 })
+                setSectionData(textData.trim());
                 setOpen(true)
-                setSectionData(textData);
                 break;
-            default: console.log("not valid!")
+            default:
+                break;
         }
     }
 
@@ -155,11 +148,11 @@ const Profile = () => {
                                                 <ul>
                                                     <li className="my-2 text-base hover:cursor-pointer">
                                                         <span className=" mr-1"><LinkedInIcon fontSize="medium" /></span>
-                                                        <span className="text-blue-500">{personalData?.LinkedIn ? <a href={personalData?.LinkedIn} target="_">{returnUserNameFromURL(personalData?.LinkedIn)}</a> : "Add LinkedIn Link"}</span>
+                                                        <span className="text-blue-500">{safeUrl(personalData?.LinkedIn) ? <a href={safeUrl(personalData?.LinkedIn)} target="_blank" rel="noopener noreferrer">{returnUserNameFromURL(personalData?.LinkedIn)}</a> : "Add LinkedIn Link"}</span>
                                                     </li>
                                                     <li className="my-2 text-base hover:cursor-pointer">
                                                         <span className=" mr-1"><GitHubIcon fontSize="medium" /></span>
-                                                        <span className="text-blue-500">{personalData?.Github ? <a href={personalData?.Github} target="_">{returnUserNameFromURL(personalData?.Github)}</a> : "Add Github Link"}</span>
+                                                        <span className="text-blue-500">{safeUrl(personalData?.Github) ? <a href={safeUrl(personalData?.Github)} target="_blank" rel="noopener noreferrer">{returnUserNameFromURL(personalData?.Github)}</a> : "Add Github Link"}</span>
                                                     </li>
                                                     <li className="my-2 text-base hover:cursor-pointer">
                                                         <span className=" mr-1"><EmailIcon fontSize="medium" /></span>
@@ -188,8 +181,8 @@ const Profile = () => {
                                             <p className="text-gray-700" id="careerObjective">{personalData?.CareerObjective}</p>
                                             <div className="flex items-end justify-start gap-x-4  mt-6 mb-4">
                                                 <h2 className="text-xl font-bold">Experience</h2>
-                                                {expirienceData ?
-                                                    <p className="hover:cursor-pointer flex items-center gap-x-1 text-white rounded-md text-sm p-2 bg-color1" onClick={() => { setSectionName("experience"); GeneratePlainTextData("experience") }}> <span><AutoAwesomeIcon fontSize="small" /></span> Get AI Suggestions</p>
+                                                {expirienceData?.length > 0 ?
+                                                    <button type="button" className="hover:cursor-pointer flex items-center gap-x-1 text-white rounded-md text-sm p-2 bg-color1" onClick={() => { setSectionName("experience"); GeneratePlainTextData("experience") }}> <span><AutoAwesomeIcon fontSize="small" /></span> Get AI Suggestions</button>
                                                     :
                                                     <span>Add Your Experience</span>
                                                 }
@@ -205,9 +198,8 @@ const Profile = () => {
                                                             <p className="font-semibold">Responsibilities</p>
                                                             <ul className="list-disc list-outside ml-6 md:w-[70%]">
                                                                 {
-                                                                    data.Responsibilities.split('\n').map((point, i) => (
+                                                                    toLines(data?.Responsibilities).map((point, i) => (
                                                                         <li key={i}>{point}</li>
-
                                                                     ))
                                                                 }
                                                             </ul>
@@ -236,8 +228,8 @@ const Profile = () => {
                                             }
                                             <div className="flex items-end justify-start gap-x-4  mt-6 mb-4">
                                                 <h2 className="text-xl font-bold">Projects</h2>
-                                                {projecData ?
-                                                    <p className="hover:cursor-pointer flex items-center gap-x-1 text-white rounded-md text-sm p-2 bg-color1" onClick={() => {setSectionName("project"); GeneratePlainTextData("project")}}> <span><AutoAwesomeIcon fontSize="small" /></span> Get AI Suggestions</p>
+                                                {projecData?.length > 0 ?
+                                                    <button type="button" className="hover:cursor-pointer flex items-center gap-x-1 text-white rounded-md text-sm p-2 bg-color1" onClick={() => {setSectionName("project"); GeneratePlainTextData("project")}}> <span><AutoAwesomeIcon fontSize="small" /></span> Get AI Suggestions</button>
                                                     :
                                                     <span>Add Your Projects</span>
                                                 }
@@ -247,10 +239,10 @@ const Profile = () => {
                                                     <div key={i} className="mb-6">
                                                         <div className="flex justify-between gap-2 w-full">
                                                             <div>
-                                                                <p className="text-gray-700 font-bold" > <span> {data.Project}</span> <span>|&nbsp;{data.SkillsUsed}</span> <span> <a href={data.Link} target="_"><OpenInNewIcon fontSize="medium" /></a></span></p>
+                                                                <p className="text-gray-700 font-bold" > <span> {data.Project}</span> <span>|&nbsp;{data.SkillsUsed}</span> {safeUrl(data?.Link) && <span> <a href={safeUrl(data.Link)} target="_blank" rel="noopener noreferrer" aria-label={`Open ${data.Project}`}><OpenInNewIcon fontSize="medium" /></a></span>}</p>
                                                                 <ul className="list-disc list-outside ml-6 md:w-[70%]">
                                                                     {
-                                                                        data.Description.split('\n').map((point, i) => (
+                                                                        toLines(data?.Description).map((point, i) => (
                                                                             <li key={i}>{point}</li>
                                                                         ))
                                                                     }

@@ -1,37 +1,68 @@
-import axios from "axios";
-import OpenAI from "openai";
+import { Client, Functions } from "appwrite";
+import config from "../config/config";
 
-const getResumeSuggestions = async (resumeSection, data) => {
+/**
+ * Calls the `ai-suggestions` Appwrite function. The OpenAI key stays on the
+ * server — see functions/ai-suggestions/README.md.
+ *
+ * Always resolves to either { suggestions: string[] } or { error: string },
+ * never a thrown exception or a raw Error object, so callers can render it.
+ */
+export class SuggestionService {
+    client = new Client();
+    functions;
 
-    const api_key = import.meta.env.VITE_OPENAI_API_KEY;
-    const openai = new OpenAI({
-        apiKey: api_key,
-        dangerouslyAllowBrowser: true
-    })
-    const prompt = `Act as an interviewer, here is my ${resumeSection} section ${data} \n. give suggestions which i can improve in the given section`
-
-    // console.log(prompt);
-    try {
-        const response = await openai.chat.completions.create({
-            model: "gpt-3.5-turbo",
-            messages: [
-                {
-                    "role": "user",
-                    "content": prompt
-                },
-            ],
-            temperature: 1,
-            max_tokens: 200,
-            top_p: 1,
-            frequency_penalty: 0,
-            presence_penalty: 0,
-        });
-        // console.log(response.choices[0].message.content);
-        return response.choices[0].message.content;
+    constructor() {
+        this.client.setEndpoint(config.appwriteURL).setProject(config.appWriteProjectID);
+        this.functions = new Functions(this.client);
     }
-    catch (error) {
-        console.log(error);
-        return error;
+
+    async getResumeSuggestions(resumeSection, data) {
+        if (!config.appWriteAIFunctionID) {
+            return { error: "AI suggestions aren't configured yet." };
+        }
+        if (!String(data ?? "").trim()) {
+            return { error: "Add some content to this section first." };
+        }
+
+        try {
+            const execution = await this.functions.createExecution(
+                config.appWriteAIFunctionID,
+                JSON.stringify({ section: resumeSection, data }),
+                false,
+                "/",
+                "POST",
+                { "content-type": "application/json" }
+            );
+
+            const body = execution.responseBody ?? execution.response ?? "";
+            let parsed;
+            try {
+                parsed = JSON.parse(body);
+            } catch {
+                return { error: "Could not generate suggestions. Please try again." };
+            }
+
+            if (parsed?.error) return { error: String(parsed.error) };
+
+            const suggestions = Array.isArray(parsed?.suggestions)
+                ? parsed.suggestions.filter((item) => String(item ?? "").trim())
+                : [];
+
+            return suggestions.length
+                ? { suggestions }
+                : { error: "No suggestions came back. Please try again." };
+        } catch (error) {
+            return {
+                error: error?.response?.message ?? error?.message ?? "Could not generate suggestions.",
+            };
+        }
     }
 }
+
+const suggestionService = new SuggestionService();
+
+const getResumeSuggestions = (resumeSection, data) =>
+    suggestionService.getResumeSuggestions(resumeSection, data);
+
 export default getResumeSuggestions;

@@ -1,91 +1,87 @@
 import config from "../config/config";
-import { Client, Databases, ID, Permission, Role } from "appwrite";
+import { Client, Databases, Permission, Role } from "appwrite";
 
+const SECTIONS = [
+    "personalDetails",
+    "educationalDetails",
+    "expirienceDetails",
+    "skillDetails",
+    "projectDetails",
+];
+
+/** Sections are stored as JSON strings in Appwrite attributes. */
+const serializeSections = (data = {}) =>
+    SECTIONS.reduce((payload, key) => {
+        payload[key] = JSON.stringify(data[key] ?? (key === "personalDetails" ? {} : []));
+        return payload;
+    }, {});
+
+const readableError = (error, fallback) =>
+    error?.response?.message ?? error?.message ?? fallback;
 
 export class Service {
     client = new Client();
     databases;
 
     constructor() {
-        this.client
-            .setEndpoint(config.appwriteURL)
-            .setProject(config.appWriteProjectID)
+        this.client.setEndpoint(config.appwriteURL).setProject(config.appWriteProjectID);
         this.databases = new Databases(this.client);
     }
 
-    async createData(User_ID, {
-        personalDetails,
-        educationalDetails,
-        expirienceDetails,
-        skillDetails,
-        projectDetails }) {
-        // eslint-disable-next-line no-useless-catch
-        try {
-            // const personalDetails = JSON.stringify(personalDetails);
-            // const educationalDetails = JSON.stringify(educationalDetails);
-            // const expirienceDetails = JSON.stringify(expirienceDetails);
-            // const skillDetails = JSON.stringify(skillDetails)
-            // const projectDetails = JSON.stringify(projectDetails)
-            const data = await this.databases.createDocument(config.appWriteDatabaseID, config.appWriteCollectionID, User_ID, {
-                User_ID,
-                personalDetails: JSON.stringify(personalDetails),
-                educationalDetails: JSON.stringify(educationalDetails),
-                expirienceDetails: JSON.stringify(expirienceDetails),
-                skillDetails: JSON.stringify(skillDetails),
-                projectDetails: JSON.stringify(projectDetails)
-            })
-            if (data) {
-                return data;
-            }
-        }
-        catch (err) {
-            throw err;
-        }
+    async createData(User_ID, data) {
+        // Explicit document-level permissions: without these, access falls back to
+        // collection-level rules and one signed-in user can read another's resume.
+        const permissions = [
+            Permission.read(Role.user(User_ID)),
+            Permission.update(Role.user(User_ID)),
+            Permission.delete(Role.user(User_ID)),
+        ];
+
+        return this.databases.createDocument(
+            config.appWriteDatabaseID,
+            config.appWriteCollectionID,
+            User_ID,
+            { User_ID, ...serializeSections(data) },
+            permissions
+        );
     }
 
     async getData(User_ID) {
         try {
-            const data = await this.databases.getDocument(config.appWriteDatabaseID, config.appWriteCollectionID, User_ID)
-            if (data) {
-                return data;
-            }
-            else {
-                return "No Data Available!";
-            }
-        }
-        catch (error) {
-            console.log(error.response.message);
-            return { error: "No data Found!", code: error.code };
+            return await this.databases.getDocument(
+                config.appWriteDatabaseID,
+                config.appWriteCollectionID,
+                User_ID
+            );
+        } catch (error) {
+            return { error: readableError(error, "No data found!"), code: error?.code };
         }
     }
 
-    async updateData(userID, {
-        personalDetails,
-        educationalDetails,
-        expirienceDetails,
-        skillDetails,
-        projectDetails
-    }) {
+    async updateData(userID, data) {
         try {
-            await this.databases.updateDocument(config.appWriteDatabaseID, config.appWriteCollectionID, userID, {
-                personalDetails: JSON.stringify(personalDetails),
-                educationalDetails: JSON.stringify(educationalDetails),
-                expirienceDetails: JSON.stringify(expirienceDetails),
-                skillDetails: JSON.stringify(skillDetails),
-                projectDetails: JSON.stringify(projectDetails)
-            })
-        }
-        catch (error) {
-            return { error: error.response.message, code: error.code }
+            // Returning the updated document lets the store refresh without a refetch.
+            return await this.databases.updateDocument(
+                config.appWriteDatabaseID,
+                config.appWriteCollectionID,
+                userID,
+                serializeSections(data)
+            );
+        } catch (error) {
+            return { error: readableError(error, "Could not save your changes."), code: error?.code };
         }
     }
 
     async deleteData(Document_ID) {
         try {
-            await this.databases.deleteDocument(config.appWriteDatabaseID, config.appWriteCollectionID, Document_ID)
-        }
-        catch (error) {
-            console.log(error);
+            await this.databases.deleteDocument(
+                config.appWriteDatabaseID,
+                config.appWriteCollectionID,
+                Document_ID
+            );
+            return { success: true };
+        } catch (error) {
+            return { error: readableError(error, "Could not delete your data."), code: error?.code };
         }
     }
 }

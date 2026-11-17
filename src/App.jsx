@@ -10,6 +10,7 @@ import ProtectedRoute from "./components/Auth/ProtectedRoute";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Loader from "./components/Loader/Loader";
+import ErrorBoundary from "./components/ErrorBoundary/ErrorBoundary";
 import "./App.css";
 
 const Login = lazy(() => import("./pages/Login/Login"));
@@ -28,17 +29,16 @@ function App() {
     authService
       .getCurrentUser()
       .then((data) => {
-        if (data.error) {
-          // console.log(data);
+        if (!data || data.error) {
+          // Also marks the session check as complete, which releases route guards.
           dispatch(logout());
         } else {
-          // console.log("userData App.js=>", data);
           dispatch(getUser(data)); //* passing current user data
           dispatch(login(data));
           dispatch(fetchUserData(data));
         }
       })
-      .catch((err) => console.log(err));
+      .catch(() => dispatch(logout()));
   }, [dispatch]);
 
   return (
@@ -53,57 +53,59 @@ function App() {
         theme="light"
       />
       <Header />
-      <Suspense fallback={<Loader />}>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route exact path="/templates" element={<TemplatePage />} />
-          <Route
-            exact
-            path="/template1"
-            element={
-              <ProtectedRoute>
-                <Template1WithLogic />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            exact
-            path="/template2"
-            element={
-              <ProtectedRoute>
-                <Template2WithLogic />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/profile"
-            element={
-              <ProtectedRoute>
-                <Profile />
-              </ProtectedRoute>
-            }
-          />
+      <ErrorBoundary>
+        <Suspense fallback={<Loader />}>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route exact path="/templates" element={<TemplatePage />} />
+            <Route
+              exact
+              path="/template1"
+              element={
+                <ProtectedRoute>
+                  <Template1WithLogic />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              exact
+              path="/template2"
+              element={
+                <ProtectedRoute>
+                  <Template2WithLogic />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/profile"
+              element={
+                <ProtectedRoute>
+                  <Profile />
+                </ProtectedRoute>
+              }
+            />
 
-          <Route
-            path="/details"
-            element={
-              <ProtectedRoute>
-                <DetailsPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/edit"
-            element={
-              <ProtectedRoute>
-                <EditDetails />
-              </ProtectedRoute>
-            }
-          />
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<SignUp />} />
-        </Routes>
-      </Suspense>
+            <Route
+              path="/details"
+              element={
+                <ProtectedRoute>
+                  <DetailsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/edit"
+              element={
+                <ProtectedRoute>
+                  <EditDetails />
+                </ProtectedRoute>
+              }
+            />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<SignUp />} />
+          </Routes>
+        </Suspense>
+      </ErrorBoundary>
     </>
   );
 }
