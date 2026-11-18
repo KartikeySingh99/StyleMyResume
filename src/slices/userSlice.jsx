@@ -29,7 +29,6 @@ const normalizeDocument = (document = {}) => {
         personalDetails,
         educationalDetails,
         experienceDetails,
-        expirienceDetails,
         skillDetails,
         projectDetails,
         ...rest
@@ -40,7 +39,7 @@ const normalizeDocument = (document = {}) => {
         title: rest.title || DEFAULT_RESUME_TITLE,
         personalDetails: parseSection(personalDetails, {}),
         educationalDetails: parseSection(educationalDetails, []),
-        experienceDetails: parseSection(experienceDetails ?? expirienceDetails, []),
+        experienceDetails: parseSection(experienceDetails, []),
         skillDetails: parseSection(skillDetails, []),
         projectDetails: parseSection(projectDetails, []),
     };
