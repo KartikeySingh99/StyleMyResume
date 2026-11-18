@@ -9,6 +9,7 @@
  */
 import { Client, Databases, Query } from "node-appwrite";
 import { planDocumentUpdate } from "./lib/transform.mjs";
+import { explainAppwriteError } from "./lib/errors.mjs";
 
 const DRY_RUN = process.argv.includes("--dry-run");
 const PAGE_SIZE = 100;
@@ -63,37 +64,6 @@ async function* eachDocument() {
     }
 }
 
-/** Config mistakes are predictable here — explain them instead of dumping a stack. */
-function explainFailure(error) {
-    const code = error?.code;
-    const type = error?.type;
-    console.error(`\nAppwrite request failed (${code ?? "no status"}${type ? ` ${type}` : ""}): ${error?.message ?? error}`);
-
-    if (type === "api_key_invalid" || code === 401) {
-        console.error(
-            "\nThe key is not valid for this project. In order of likelihood:\n" +
-            "  1. The API key belongs to a different project than APPWRITE_PROJECT_ID.\n" +
-            "  2. APPWRITE_ENDPOINT is wrong. Appwrite Cloud projects live on regional hosts\n" +
-            "     (e.g. https://fra.cloud.appwrite.io/v1). Copy it verbatim from\n" +
-            "     Console -> Settings -> API Endpoint.\n" +
-            "  3. The value is not a server API key (a project id or JWT will fail this way).\n" +
-            "Check without revealing the key: echo \"len: ${#APPWRITE_API_KEY}\""
-        );
-    } else if (type === "general_unauthorized_scope" || type === "user_unauthorized") {
-        console.error("\nThe key is valid but missing scopes. Grant documents.read and documents.write.");
-    } else if (code === 404) {
-        console.error("\nNot found — check APPWRITE_DATABASE_ID and APPWRITE_COLLECTION_ID.");
-    } else if (/attribute/i.test(error?.message ?? "")) {
-        console.error(
-            "\nAttribute problem. Confirm `experienceDetails` and `title` exist and show\n" +
-            "status `available`, and that the owner attribute is really named `User_ID`\n" +
-            "(if not, update OWNER_ATTRIBUTE in scripts/lib/transform.mjs and src/appwrite/database.js)."
-        );
-    }
-
-    console.error("\nNothing was written." + (DRY_RUN ? "" : " Re-run with --dry-run once the config is fixed."));
-}
-
 const stats = { seen: 0, updated: 0, alreadyMigrated: 0, skipped: 0, failed: 0 };
 const dropped = [];
 
@@ -142,7 +112,7 @@ try {
     }
 } catch (error) {
     // Thrown by listDocuments — i.e. we never got a usable page of documents.
-    explainFailure(error);
+    console.error(explainAppwriteError(error, { dryRun: DRY_RUN }));
     process.exit(1);
 }
 
