@@ -87,10 +87,23 @@ dry-run output for a "Permissions replaced" section before applying.
 
 ## 4. Verify, then clean up
 
-1. Load the app and confirm an existing resume renders, including the
-   Experience section.
-2. Edit and save it — this writes through the new document-id path.
-3. Only then delete the `expirienceDetails` attribute in the console.
+Order matters here too. A **deployed older build still reads
+`expirienceDetails`**, so deleting that attribute before the new build is live
+breaks production (the old code has no null-safety around
+`Responsibilities.split()`).
+
+1. Load the app **locally** and confirm an existing resume renders, including
+   the Experience section. Edit and save it — that exercises the new
+   document-id write path.
+2. Deploy the new build. Remember Vite inlines `import.meta.env.*` at build
+   time, so set any new variables in Netlify **before** triggering the build.
+3. Verify a resume renders on the deployed site.
+4. Only now delete the `expirienceDetails` attribute in the console.
+5. Remove the read fallback for the old spelling in `src/slices/userSlice.jsx`
+   (`experienceDetails ?? expirienceDetails`) — it is dead code once the
+   attribute is gone.
+6. **Delete the migration API key.** It carries document write access, the app
+   never uses it, and it is not needed again.
 
 Until step 4 the app reads **either** spelling (`src/slices/userSlice.jsx`
 falls back to the old name), so old and new documents both work. That fallback
