@@ -1,39 +1,17 @@
-import { useEffect, useState } from "react";
+import { useMemo } from "react";
 import useMakeURLShort from "../../hooks/useMakeURLShort";
 import FormatBar from "../../components/Template/FormatBar";
 import withTemplateWrapper from "../../components/Template/withTemplateWrapper";
-import BottomNavbar from "../../components/Template/BottomNavbar";
 import propTypes from "prop-types";
+import { toLines } from "../../utils/text";
+import { safeUrl } from "../../utils/url";
+import { groupSkills } from "../../utils/skills";
 
-const Template1 = ({ componentRef, user, margin, fontStyle, setFontStyle, setMargin, zoomLevel, setZoomLevel }) => {
-
-    const [filteredSkills, setFilterSkills] = useState({});
+const Template1 = ({ componentRef, user, margin, fontStyle, setFontStyle, setMargin }) => {
 
     const { returnUserNameFromURL } = useMakeURLShort()
 
-    useEffect(() => {
-        const skills = {}
-        if (Object.entries(user).length > 0) {
-
-            user && user?.userData?.skillDetails.forEach((data) => {
-                if (!(data.skillType in skills)) {
-                    skills[data.skillType] = []; //* here we are declaring the keys with empty array
-                    skills[data.skillType].push(data.Skill);
-                }
-                else {
-                    skills[data.skillType].push(data.Skill);
-                }
-            })
-            setFilterSkills(skills)
-        }
-    }, [user])
-
-    const handleSelectText = () => {
-        let text = window.getSelection().toString();
-        // if(text){
-
-        // }
-    }
+    const filteredSkills = useMemo(() => groupSkills(user?.userData?.skillDetails), [user]);
 
     return (
         <>
@@ -42,10 +20,10 @@ const Template1 = ({ componentRef, user, margin, fontStyle, setFontStyle, setMar
                 <div ref={componentRef} className={`${fontStyle} lg:w-[794px] lg:h-[1123px] rounded-lg bg-white ${margin}`}>
                     <div className="flex rounded-t-lg sm:px-2 w-full">
                         <div className="mt-4 mb-2 flex items-center justify-center gap-y-2 flex-col text-center  w-full">
-                            <p className="font-bold text-heading sm:text-3xl text-2xl uppercase" onMouseUp={handleSelectText}>
+                            <p className="font-bold text-heading sm:text-3xl text-2xl uppercase">
                                 {user?.userData?.personalDetails?.Name}
                             </p>
-                            <p className="font-semibold text-sm"><span>{user?.userData?.personalDetails?.PhoneNumber}</span> | <span><a href={`mailto:${user?.userData?.personalDetails?.Email}`}>{user?.userData?.personalDetails?.Email}</a></span> {user?.userData?.personalDetails?.LinkedIn && <span>|&nbsp;<a href={user?.userData?.personalDetails?.LinkedIn} target="_">{returnUserNameFromURL(user?.userData?.personalDetails?.LinkedIn)}</a></span>} {user?.userData?.personalDetails?.Github && <span>|&nbsp;<a href={user?.userData?.personalDetails?.Github} target="_">{returnUserNameFromURL(user?.userData?.personalDetails?.Github)}</a></span>}</p>
+                            <p className="font-semibold text-sm"><span>{user?.userData?.personalDetails?.PhoneNumber}</span> | <span><a href={`mailto:${user?.userData?.personalDetails?.Email}`}>{user?.userData?.personalDetails?.Email}</a></span> {safeUrl(user?.userData?.personalDetails?.LinkedIn) && <span>|&nbsp;<a href={safeUrl(user.userData.personalDetails.LinkedIn)} target="_blank" rel="noopener noreferrer">{returnUserNameFromURL(user?.userData?.personalDetails?.LinkedIn)}</a></span>} {safeUrl(user?.userData?.personalDetails?.Github) && <span>|&nbsp;<a href={safeUrl(user.userData.personalDetails.Github)} target="_blank" rel="noopener noreferrer">{returnUserNameFromURL(user?.userData?.personalDetails?.Github)}</a></span>}</p>
                         </div>
                     </div>
                     {/* main content */}
@@ -79,13 +57,13 @@ const Template1 = ({ componentRef, user, margin, fontStyle, setFontStyle, setMar
                                 }
                             </div>
                             {
-                                user?.userData?.expirienceDetails &&
+                                user?.userData?.experienceDetails &&
                                 <div className="px-4">
                                     <h1 className="sm:text-lg text-base font-bold mt-2 uppercase">Experience</h1>
                                     <div className="h-[1px] w-full bg-black mb-2"></div>
                                     {/** Section */}
                                     {
-                                        user?.userData?.expirienceDetails.map((data, i) => (
+                                        user?.userData?.experienceDetails.map((data, i) => (
 
                                             <div key={i} className="my-2">
                                                 <div className="flex items-start justify-between">
@@ -101,7 +79,7 @@ const Template1 = ({ componentRef, user, margin, fontStyle, setFontStyle, setMar
                                                     <ul className="list-disc list-outside ml-5">
 
                                                         {
-                                                            data.Responsibilities.split('\n').map((res, i) => (
+                                                            toLines(data?.Responsibilities).map((res, i) => (
                                                                 <li key={i}>{res}</li>
                                                             ))
                                                         }
@@ -124,13 +102,13 @@ const Template1 = ({ componentRef, user, margin, fontStyle, setFontStyle, setMar
 
                                             <div key={i} className="my-2">
                                                 <div className="flex items-center justify-between">
-                                                    <h2 className="sm:text-base text-sm font-bold"><span>{data.Project}</span> | <a href={data.Link} target="_">Link</a></h2>
+                                                    <h2 className="sm:text-base text-sm font-bold"><span>{data.Project}</span>{safeUrl(data?.Link) && <> | <a href={safeUrl(data.Link)} target="_blank" rel="noopener noreferrer">Link</a></>}</h2>
                                                     <p className="sm:text-base text-sm font-semibold">{data.Year}</p>
                                                 </div>
                                                 <div className="sm:text-base text-sm">
                                                     <ul className="list-disc list-outside ml-5">
                                                         {
-                                                            data.Description.split('\n').map((item, i) => (
+                                                            toLines(data?.Description).map((item, i) => (
                                                                 <li key={i}>{item}</li>
                                                             ))
                                                         }

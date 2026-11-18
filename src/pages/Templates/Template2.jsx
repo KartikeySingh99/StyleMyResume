@@ -1,33 +1,16 @@
-import { useEffect, useState } from "react";
+import { useMemo } from "react";
 import useMakeURLShort from "../../hooks/useMakeURLShort";
 import withTemplateWrapper from "../../components/Template/withTemplateWrapper";
 import FormatBar from "../../components/Template/FormatBar";
-import BottomNavbar from "../../components/Template/BottomNavbar";
 import propTypes from "prop-types";
+import { toLines } from "../../utils/text";
+import { groupSkills } from "../../utils/skills";
 
-const Template2 = ({ componentRef, user, margin, setMargin, fontStyle, setFontStyle, zoomLevel, setZoomLevel }) => {
-
-    const [filteredSkills, setFilterSkills] = useState({});
+const Template2 = ({ componentRef, user, margin, setMargin, fontStyle, setFontStyle }) => {
 
     const { returnUserNameFromURL } = useMakeURLShort()
 
-
-    useEffect(() => {
-        const skills = {}
-        if (Object.entries(user).length > 0) {
-
-            user && user?.userData?.skillDetails.forEach((data) => {
-                if (!(data.skillType in skills)) {
-                    skills[data.skillType] = []; //* here we are declaring the keys with empty array
-                    skills[data.skillType].push(data.Skill);
-                }
-                else {
-                    skills[data.skillType].push(data.Skill);
-                }
-            })
-            setFilterSkills(skills)
-        }
-    }, [user])
+    const filteredSkills = useMemo(() => groupSkills(user?.userData?.skillDetails), [user]);
 
     return (
         <>
@@ -59,14 +42,14 @@ const Template2 = ({ componentRef, user, margin, setMargin, fontStyle, setFontSt
                         <div className="mt-4">
                             <h3 className="text-lg font-semibold mb-2">Experience</h3>
                             {
-                                user?.userData?.expirienceDetails?.map((data) => (
+                                user?.userData?.experienceDetails?.map((data, index) => (
 
-                                    <div key={data.Company} className="my-2">
+                                    <div key={index} className="my-2">
                                         <h4 className="text-base font-semibold">{data.Company}</h4>
                                         <p className="text-sm font-semibold text-gray-600">{data.Profile} | {data.From} - {data.To}</p>
                                         <ul className="list-disc list-outside ml-5 text-sm">
                                             {
-                                                data.Responsibilities.split('\n').map((point, i) => (
+                                                toLines(data?.Responsibilities).map((point, i) => (
                                                     <li key={i}>{point}</li>
                                                 ))
                                             }
@@ -78,14 +61,14 @@ const Template2 = ({ componentRef, user, margin, setMargin, fontStyle, setFontSt
                         <div className="my-4">
                             <h3 className="text-lg font-semibold mb-2">Projects</h3>
                             {
-                                user?.userData?.projectDetails?.map((data) => (
+                                user?.userData?.projectDetails?.map((data, index) => (
 
-                                    <div key={data.Project} className="my-2">
+                                    <div key={index} className="my-2">
                                         <h4 className="text-base font-semibold">{data.Project}</h4>
                                         <p className="text-sm font-semibold text-gray-600">{data.SkillsUsed} | {data.Year}</p>
                                         <ul className="list-disc list-outside ml-5 text-sm">
                                             {
-                                                data.Description.split('\n').map((point, i) => (
+                                                toLines(data?.Description).map((point, i) => (
                                                     <li key={i}>{point}</li>
                                                 ))
                                             }

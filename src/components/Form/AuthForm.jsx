@@ -13,6 +13,7 @@ const AuthForm = ({ onSubmit, formHeading, type }) => {
     const fields = [
         {
             field: <Controller
+                key='name'
                 name='name'
                 control={control}
                 rules={{
@@ -40,6 +41,7 @@ const AuthForm = ({ onSubmit, formHeading, type }) => {
         },
         {
             field: <Controller
+                key='email'
                 name='email'
                 control={control}
                 rules={{
@@ -72,6 +74,7 @@ const AuthForm = ({ onSubmit, formHeading, type }) => {
         },
         {
             field: <Controller
+                key='password'
                 name='password'
                 control={control}
                 rules={{

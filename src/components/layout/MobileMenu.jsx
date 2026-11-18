@@ -1,3 +1,4 @@
+import { Fragment } from "react";
 import { useSelector } from "react-redux";
 import Box from "@mui/material/Box";
 import Drawer from "@mui/material/Drawer";
@@ -82,7 +83,7 @@ const MobileMenu = ({ openMenu, setOpenMenu, logout }) => {
       </div>
       <ul className="text-slate-500 mt-6 divide-y-2">
         {menuOptions.map((option, index) => (
-          <>
+          <Fragment key={index}>
             {option.isAuthReq && isAuthenticated && (
               <li
                 // key={index}
@@ -119,7 +120,7 @@ const MobileMenu = ({ openMenu, setOpenMenu, logout }) => {
                 <p className=" text-md font-semibold">{option.name}</p>
               </li>
             )}
-          </>
+          </Fragment>
         ))}
         {isAuthenticated && (
           <li

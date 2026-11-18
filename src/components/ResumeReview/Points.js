@@ -14,7 +14,7 @@ export const Points = [
             },
             {
                 pointIdentified: "Experience Details Added! Share Your Professional Story.",
-                section: "expirienceDetails",
+                section: "experienceDetails",
                 pointMustHave: "Experience Details Missing! Let Employers Know Your Skills."
             },
             {
@@ -56,7 +56,7 @@ export const Points = [
         name:"Experience Details",
         points:[
             {
-                section:"expirienceDetails",
+                section:"experienceDetails",
                 pointMustHave:""
 
             }

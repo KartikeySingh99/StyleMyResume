@@ -4,7 +4,9 @@ import { useDispatch, useSelector } from 'react-redux';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
-import { saveData, editData, fetchUserData } from '../../slices/userSlice';
+import { toast } from 'react-toastify';
+import { saveUserData, editData, fetchUserData } from '../../slices/userSlice';
+import { dropEmptyRows, findMissingRequiredField } from '../../utils/text';
 import Form from './Form';
 import Loader from "../Loader/Loader";
 import ResumeReview from '../ResumeReview/ResumeReview';
@@ -46,7 +48,7 @@ const Details = ({ actionType }) => {
     const [value, setValue] = useState(0);
     const [detailedData, setDetailedData] = useState({});
     const [educationalDetails, setEducationDetails] = useState([]);
-    const [expirienceDetails, setExperienceDetails] = useState([]);
+    const [experienceDetails, setExperienceDetails] = useState([]);
     const [skillDetails, setSkillDetails] = useState([]);
     const [personalDetails, setPersonalDetails] = useState({});
     const [projectDetails, setProjectDetails] = useState([]);
@@ -67,13 +69,13 @@ const Details = ({ actionType }) => {
         if (user && actionType === "edit") {
             setPersonalDetails(user?.userData?.personalDetails);
             setEducationDetails(user?.userData?.educationalDetails);
-            setExperienceDetails(user?.userData?.expirienceDetails);
+            setExperienceDetails(user?.userData?.experienceDetails);
             setProjectDetails(user?.userData?.projectDetails);
             setSkillDetails(user?.userData?.skillDetails);
             setDetailedData(user?.userData)
         }
         else if (actionType === "create") {
-            setPersonalDetails({ Name: "", Email: "", PhoneNumber: "", Address: "", Designation: "", CareerObjective: "", Linkedin: "", Github: "" });
+            setPersonalDetails({ Name: "", Email: "", PhoneNumber: "", Address: "", Designation: "", CareerObjective: "", LinkedIn: "", Github: "" });
             setEducationDetails([{ Course: "", InstituteName: "", Year: "", Marks: "" }])
             setExperienceDetails([{ Company: "", Profile: "", From: "", To: '', Responsibilities: "" }])
             setProjectDetails([{ Project: "", Description: "", Link: "", Year: "", SkillsUsed: "" }])
@@ -246,6 +248,26 @@ const Details = ({ actionType }) => {
     ]
 
 
+    /**
+     * Validates a repeatable section before storing it. Previously the check only
+     * looked at the last row and advanced the tab regardless, so an invalid section
+     * was dropped from the saved resume without telling the user.
+     */
+    const commitSection = (rows, fields, sectionKey, setSection, nextTab) => {
+        const cleanedRows = dropEmptyRows(rows);
+        const missingField = findMissingRequiredField(cleanedRows, fields);
+
+        if (missingField) {
+            toast.error(`Please fill "${missingField}" before continuing.`);
+            return null;
+        }
+
+        setSection(cleanedRows);
+        setDetailedData((prev) => ({ ...prev, [sectionKey]: cleanedRows }));
+        if (nextTab !== undefined) setValue(nextTab);
+        return cleanedRows;
+    }
+
     const handlePersonalData = (data) => {
         setPersonalDetails(data)
         setDetailedData((prev) => ({ ...prev, personalDetails: data }))
@@ -253,76 +275,39 @@ const Details = ({ actionType }) => {
     }
 
     const handleEducationalData = (data) => {
-        let isEmpty = false;
-        data.educationDetailsArray.map((data) => {
-            if (Object.values(data).includes('')) {
-                return isEmpty = true;
-            }
-            return isEmpty = false;
-        })
-        if (!isEmpty) {
-            setEducationDetails(data.educationDetailsArray)
-            setDetailedData((prev) => ({ ...prev, educationalDetails: data.educationDetailsArray }))
-        }
-        setValue(2)
-    }
-
-    const handleSkillData = (data) => {
-        // const skills = data.Skill.split(',');
-        let isEmpty = false;
-        data.skillsArray.map((data) => {
-            if (Object.values(data).includes('')) {
-                return isEmpty = true;
-            }
-            return isEmpty = false;
-        })
-        if (!isEmpty) {
-            setSkillDetails(data.skillsArray)
-            setDetailedData((prev) => ({ ...prev, skillDetails: data.skillsArray }))
-        }
-        setValue(4)
+        commitSection(data.educationDetailsArray, educationDetailsFields, "educationalDetails", setEducationDetails, 2);
     }
 
     const handleExperienceData = (data) => {
-        let isEmpty = false;
-        data.experienceArray.map((data) => {
-            if (Object.values(data).includes('')) {
-                return isEmpty = true;
-            }
-            return isEmpty = false;
-        })
-        if (!isEmpty) {
-            setExperienceDetails(data.experienceArray)
-            setDetailedData((prev) => ({ ...prev, expirienceDetails: data.experienceArray }))
-        }
-        setValue(3)
+        commitSection(data.experienceArray, experienceFields, "experienceDetails", setExperienceDetails, 3);
+    }
+
+    const handleSkillData = (data) => {
+        commitSection(data.skillsArray, skillsFields, "skillDetails", setSkillDetails, 4);
     }
 
     const handleProjectData = (data) => {
-        let isEmpty = false;
-        data.projectsArray.map((data) => {
-            if (Object.values(data).includes('')) {
-                return isEmpty = true;
-            }
-            return isEmpty = false;
-        })
-        if (!isEmpty) {
-            setProjectDetails(data.projectsArray)
-            setDetailedData((prev) => ({ ...prev, projectDetails: data.projectsArray }))
-            handleAllDetails({ ...detailedData, projectDetails: data.projectsArray })
+        const projects = commitSection(data.projectsArray, projectFields, "projectDetails", setProjectDetails);
+        if (projects) {
+            handleAllDetails({ ...detailedData, projectDetails: projects });
         }
-        // dispatch(saveData(detailedData))
     }
 
     const handleAllDetails = (data) => {
-        if (actionType === "create") {
-            dispatch(saveData({ userID: userData?.userId, data }));
-            navigate("/profile");
-        }
-        else if (actionType === "edit") {
-            dispatch(editData({ userID: userData?.$id, userData: data }));
-            navigate("/profile");
-        }
+        // Only navigate once the write actually succeeded.
+        // Edits target the resume's own document id; `userData.$id` is the account id,
+        // which only doubled as the document id in the pre-migration model.
+        const action = actionType === "create"
+            ? saveUserData({ userID: userData?.userId ?? userData?.$id, data })
+            : editData({ documentID: user?.userData?.$id, userData: data });
+
+        dispatch(action)
+            .unwrap()
+            .then(() => {
+                toast.success(actionType === "create" ? "Details saved!" : "Details updated!", { autoClose: 1000 });
+                navigate("/profile");
+            })
+            .catch((message) => toast.error(message || "Could not save your details."));
     }
 
 
@@ -383,7 +368,7 @@ const Details = ({ actionType }) => {
                                 sectionName='Experience'
                                 label='experience'
                                 dynamicFields={experienceFields}
-                                defaultValues={{ experienceArray: expirienceDetails }}
+                                defaultValues={{ experienceArray: experienceDetails }}
                                 onSubmit={handleExperienceData}
                                 value={value}
                                 setValue={setValue}
