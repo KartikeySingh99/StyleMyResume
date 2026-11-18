@@ -3,9 +3,6 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "Appwrite function that generates resume suggestions, keeping the OpenAI key server-side.",
-  "main": "src/main.js",
-  "dependencies": {
-    "openai": "^4.52.0"
-  }
+  "description": "Appwrite function that generates resume suggestions via Gemini, keeping the API key server-side.",
+  "main": "src/main.js"
 }
