@@ -19,11 +19,7 @@ const parseSection = (value, fallback) => {
     }
 };
 
-/**
- * Turns a raw Appwrite document into the shape the UI expects.
- * `expirienceDetails` is the pre-migration spelling — documents written before
- * the backfill still carry it, so both names are accepted on read.
- */
+/** Turns a raw Appwrite document into the shape the UI expects. */
 const normalizeDocument = (document = {}) => {
     const {
         personalDetails,
