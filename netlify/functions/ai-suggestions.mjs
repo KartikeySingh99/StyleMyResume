@@ -13,7 +13,10 @@
 
 const ALLOWED_SECTIONS = ["experience", "project", "education", "skills", "personalDetails"];
 const MAX_INPUT_CHARS = 6000;
-const DEFAULT_MODEL = "gemini-2.5-flash";
+// Floating alias rather than a pinned version, so it does not rot as Google
+// retires model versions.
+const DEFAULT_MODEL = "gemini-flash-latest";
+const MODELS_URL = "https://generativelanguage.googleapis.com/v1beta/models";
 
 const SYSTEM_PROMPT = `You are a technical recruiter reviewing a student or early-career resume section.
 Reply with 4-6 short, specific, actionable improvements.
@@ -74,6 +77,28 @@ export const extractSuggestions = (payload) => {
         : { error: "No suggestions came back. Please try again." };
 };
 
+/** Tolerates a stray `models/` prefix or surrounding whitespace in config. */
+export const normalizeModel = (value) =>
+    String(value ?? "").trim().replace(/^models\//, "") || DEFAULT_MODEL;
+
+/**
+ * Models this key can actually use for generateContent. Only called to explain
+ * a failure, so it must never throw or mask the original error.
+ */
+export const listUsableModels = async (apiKey, fetchImpl = fetch) => {
+    try {
+        const response = await fetchImpl(MODELS_URL, { headers: { "x-goog-api-key": apiKey } });
+        if (!response.ok) return [];
+        const { models } = await response.json();
+        return (models ?? [])
+            .filter((model) => (model.supportedGenerationMethods ?? []).includes("generateContent"))
+            .map((model) => String(model.name ?? "").replace(/^models\//, ""))
+            .filter(Boolean);
+    } catch {
+        return [];
+    }
+};
+
 /** Resolves the Appwrite user behind a JWT, or null if it is not valid. */
 export const resolveUser = async (jwt, { endpoint, projectId, fetchImpl = fetch }) => {
     if (!jwt || !endpoint || !projectId) return null;
@@ -125,7 +150,7 @@ export default async (req) => {
     if (!ALLOWED_SECTIONS.includes(section)) return json({ error: "Unsupported resume section." }, 400);
     if (!data) return json({ error: "Add some content to this section first." }, 400);
 
-    const model = process.env.GEMINI_MODEL || DEFAULT_MODEL;
+    const model = normalizeModel(process.env.GEMINI_MODEL);
 
     try {
         const response = await fetch(
@@ -149,11 +174,18 @@ export default async (req) => {
                 return json({ error: "Too many requests right now. Please try again in a minute." }, 429);
             }
             if (response.status === 404) {
+                // Don't assert a cause — report what Google said and what this key
+                // can actually use, so the next step is obvious.
+                const usable = await listUsableModels(apiKey);
+                const options = usable.filter((name) => name.includes("flash")).slice(0, 5);
                 return json(
                     {
                         error:
-                            `Model "${model}" is not available for this key. Set the GEMINI_MODEL ` +
-                            `environment variable to a model your key can use.`,
+                            `Gemini rejected model "${model}" (404). ` +
+                            (options.length
+                                ? `Models available to this key include: ${options.join(", ")}. Set GEMINI_MODEL to one of them.`
+                                : `This key returned no usable models — check that it is valid and the Generative Language API is enabled.`),
+                        detail: detail.slice(0, 300),
                     },
                     502
                 );
