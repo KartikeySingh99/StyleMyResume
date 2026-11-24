@@ -32,6 +32,32 @@ const json = (body, status = 200) =>
         headers: { "content-type": "application/json" },
     });
 
+/**
+ * Every failure carries the model, upstream status and Google's own body.
+ * The client renders only `error`; the rest is for the Network tab and logs, so
+ * a cause never has to be guessed at from a generic message again.
+ */
+const failure = (message, status, { model, status: upstream, detail } = {}) =>
+    json(
+        {
+            error: message,
+            ...(model ? { model } : {}),
+            ...(upstream ? { upstreamStatus: upstream } : {}),
+            ...(detail ? { detail: String(detail).slice(0, 500) } : {}),
+        },
+        status
+    );
+
+/** Pulls Google's human-readable message out of an error body, if there is one. */
+export const geminiMessage = (body) => {
+    try {
+        const message = JSON.parse(body)?.error?.message;
+        return message ? String(message) : null;
+    } catch {
+        return null;
+    }
+};
+
 export const buildRequestBody = (section, data) => ({
     systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
     contents: [
@@ -168,41 +194,49 @@ export default async (req) => {
 
         if (!response.ok) {
             const detail = await response.text();
-            console.error(`Gemini ${response.status} for model "${model}": ${detail.slice(0, 500)}`);
+            console.error(`Gemini ${response.status} for model "${model}": ${detail.slice(0, 1000)}`);
 
             if (response.status === 429) {
-                return json({ error: "Too many requests right now. Please try again in a minute." }, 429);
+                return failure("Too many requests right now. Please try again in a minute.", 429, {
+                    model,
+                    status: response.status,
+                    detail,
+                });
             }
+
             if (response.status === 404) {
-                // Don't assert a cause — report what Google said and what this key
-                // can actually use, so the next step is obvious.
+                // Don't assert a cause — report what this key can actually use.
                 const usable = await listUsableModels(apiKey);
                 const options = usable.filter((name) => name.includes("flash")).slice(0, 5);
-                return json(
-                    {
-                        error:
-                            `Gemini rejected model "${model}" (404). ` +
-                            (options.length
-                                ? `Models available to this key include: ${options.join(", ")}. Set GEMINI_MODEL to one of them.`
-                                : `This key returned no usable models — check that it is valid and the Generative Language API is enabled.`),
-                        detail: detail.slice(0, 300),
-                    },
-                    502
+                return failure(
+                    `Gemini rejected model "${model}" (404). ` +
+                        (options.length
+                            ? `Models available to this key include: ${options.join(", ")}. Set GEMINI_MODEL to one of them.`
+                            : `This key returned no usable models — check that it is valid and the Generative Language API is enabled.`),
+                    502,
+                    { model, status: response.status, detail }
                 );
             }
-            if (response.status === 400 || response.status === 403) {
-                return json({ error: "Suggestions are misconfigured. Check the API key." }, 502);
-            }
-            return json({ error: "Could not generate suggestions. Please try again." }, 502);
+
+            // Everything else: Google's own message is the useful part, so pass it
+            // through rather than replacing it with advice that may be wrong.
+            return failure(geminiMessage(detail) ?? "Could not generate suggestions. Please try again.", 502, {
+                model,
+                status: response.status,
+                detail,
+            });
         }
 
         const result = extractSuggestions(await response.json());
-        if (result.error) return json({ error: result.error }, 502);
+        if (result.error) return failure(result.error, 502, { model });
 
         console.log(`Generated ${result.suggestions.length} suggestions for user ${userId} (${section}).`);
         return json({ section, suggestions: result.suggestions });
     } catch (error) {
-        console.error(`Gemini request failed: ${error?.message ?? error}`);
-        return json({ error: "Could not generate suggestions. Please try again." }, 502);
+        console.error(`Gemini request failed for model "${model}": ${error?.stack ?? error}`);
+        return failure("Could not reach Gemini. Please try again.", 502, {
+            model,
+            detail: String(error?.message ?? error),
+        });
     }
 };
