@@ -93,15 +93,18 @@ export default async (req) => {
     if (req.method !== "POST") return json({ error: "Method not allowed." }, 405);
 
     const apiKey = process.env.GEMINI_API_KEY;
-    const endpoint = process.env.APPWRITE_ENDPOINT;
-    const projectId = process.env.APPWRITE_PROJECT_ID;
+    // Netlify passes every site variable to functions, so the values the web app
+    // already uses are reused here. The VITE_ prefix only tells Vite a value is
+    // safe to expose to the browser; these are public identifiers either way.
+    const endpoint = process.env.APPWRITE_ENDPOINT || process.env.VITE_APPWRITE_URL;
+    const projectId = process.env.APPWRITE_PROJECT_ID || process.env.VITE_APPWRITE_PROJECT_ID;
 
     if (!apiKey) {
         console.error("GEMINI_API_KEY is not set.");
         return json({ error: "Suggestions are not configured yet." }, 500);
     }
     if (!endpoint || !projectId) {
-        console.error("APPWRITE_ENDPOINT / APPWRITE_PROJECT_ID are not set — cannot verify callers.");
+        console.error("No Appwrite endpoint/project in the environment — cannot verify callers.");
         return json({ error: "Suggestions are not configured yet." }, 500);
     }
 
