@@ -1,62 +1,65 @@
-import { Client, Functions } from "appwrite";
+import { Account, Client } from "appwrite";
 import config from "../config/config";
 
+/** Netlify function; see netlify/functions/ai-suggestions.mjs. */
+const AI_ENDPOINT = "/.netlify/functions/ai-suggestions";
+
 /**
- * Calls the `ai-suggestions` Appwrite function. The OpenAI key stays on the
- * server — see functions/ai-suggestions/README.md.
+ * Requests resume suggestions. The Gemini key lives server-side, and the
+ * endpoint is public, so each call carries a short-lived Appwrite JWT that the
+ * function verifies before spending any quota.
  *
  * Always resolves to either { suggestions: string[] } or { error: string },
  * never a thrown exception or a raw Error object, so callers can render it.
  */
 export class SuggestionService {
     client = new Client();
-    functions;
+    account;
 
     constructor() {
         this.client.setEndpoint(config.appwriteURL).setProject(config.appWriteProjectID);
-        this.functions = new Functions(this.client);
+        this.account = new Account(this.client);
     }
 
     async getResumeSuggestions(resumeSection, data) {
-        if (!config.appWriteAIFunctionID) {
-            return { error: "AI suggestions aren't configured yet." };
-        }
         if (!String(data ?? "").trim()) {
             return { error: "Add some content to this section first." };
         }
 
+        let jwt;
         try {
-            const execution = await this.functions.createExecution(
-                config.appWriteAIFunctionID,
-                JSON.stringify({ section: resumeSection, data }),
-                false,
-                "/",
-                "POST",
-                { "content-type": "application/json" }
-            );
-
-            const body = execution.responseBody ?? execution.response ?? "";
-            let parsed;
-            try {
-                parsed = JSON.parse(body);
-            } catch {
-                return { error: "Could not generate suggestions. Please try again." };
-            }
-
-            if (parsed?.error) return { error: String(parsed.error) };
-
-            const suggestions = Array.isArray(parsed?.suggestions)
-                ? parsed.suggestions.filter((item) => String(item ?? "").trim())
-                : [];
-
-            return suggestions.length
-                ? { suggestions }
-                : { error: "No suggestions came back. Please try again." };
-        } catch (error) {
-            return {
-                error: error?.response?.message ?? error?.message ?? "Could not generate suggestions.",
-            };
+            ({ jwt } = await this.account.createJWT());
+        } catch {
+            return { error: "Please sign in again to use AI suggestions." };
         }
+
+        let response;
+        try {
+            response = await fetch(AI_ENDPOINT, {
+                method: "POST",
+                headers: { "content-type": "application/json", "x-appwrite-jwt": jwt },
+                body: JSON.stringify({ section: resumeSection, data }),
+            });
+        } catch {
+            return { error: "Could not reach the suggestions service. Check your connection." };
+        }
+
+        // `vite dev` does not serve Netlify functions — use `netlify dev` locally.
+        if (response.status === 404) {
+            return { error: "AI suggestions aren't available in this environment." };
+        }
+
+        const payload = await response.json().catch(() => null);
+        if (!payload) return { error: "Could not generate suggestions. Please try again." };
+        if (payload.error) return { error: String(payload.error) };
+
+        const suggestions = Array.isArray(payload.suggestions)
+            ? payload.suggestions.filter((item) => String(item ?? "").trim())
+            : [];
+
+        return suggestions.length
+            ? { suggestions }
+            : { error: "No suggestions came back. Please try again." };
     }
 }
 

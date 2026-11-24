@@ -4,11 +4,7 @@ import { Client, Databases, ID, Permission, Query, Role } from "appwrite";
 export const OWNER_ATTRIBUTE = "User_ID";
 export const DEFAULT_RESUME_TITLE = "My Resume";
 
-/**
- * Attributes written on save. `experienceDetails` is the corrected spelling;
- * documents created before the migration carry `expirienceDetails` instead and
- * are normalized on read (see slices/userSlice.jsx).
- */
+/** Attributes written on save; each holds a JSON-serialized section. */
 const SECTION_DEFAULTS = {
     personalDetails: {},
     educationalDetails: [],
