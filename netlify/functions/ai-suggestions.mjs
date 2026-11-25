@@ -16,7 +16,16 @@ const MAX_INPUT_CHARS = 6000;
 // Floating alias rather than a pinned version, so it does not rot as Google
 // retires model versions.
 const DEFAULT_MODEL = "gemini-flash-latest";
+// Tried when the primary model keeps reporting high demand; a pinned version is
+// often less contended than the alias everyone defaults to.
+const DEFAULT_FALLBACK_MODEL = "gemini-2.5-flash";
 const MODELS_URL = "https://generativelanguage.googleapis.com/v1beta/models";
+
+// Gemini returns 503 UNAVAILABLE under load and says the spike is temporary, so
+// a few quick retries beat surfacing a failure on the first attempt. Kept well
+// inside Netlify's synchronous function budget.
+const RETRYABLE_STATUSES = new Set([500, 502, 503, 504]);
+const BACKOFF_MS = [400, 1200];
 
 const SYSTEM_PROMPT = `You are a technical recruiter reviewing a student or early-career resume section.
 Reply with 4-6 short, specific, actionable improvements.
@@ -125,6 +134,50 @@ export const listUsableModels = async (apiKey, fetchImpl = fetch) => {
     }
 };
 
+const defaultSleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+/**
+ * Calls generateContent, retrying transient upstream failures and then falling
+ * back to a second model. Returns the first non-retryable response along with
+ * the model that produced it and how many requests were made.
+ *
+ * Retries only 5xx. A 400/403/404 is a real problem with the request and a 429
+ * means quota — hammering either makes things worse.
+ */
+export const callGemini = async (
+    { apiKey, models, body },
+    { fetchImpl = fetch, sleep = defaultSleep } = {}
+) => {
+    let attempts = 0;
+    let last = null;
+
+    for (const model of models) {
+        for (let tryIndex = 0; tryIndex < BACKOFF_MS.length + 1; tryIndex++) {
+            attempts++;
+            const response = await fetchImpl(
+                `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
+                {
+                    method: "POST",
+                    headers: {
+                        "content-type": "application/json",
+                        // Header rather than ?key= so the secret stays out of URLs and logs.
+                        "x-goog-api-key": apiKey,
+                    },
+                    body: JSON.stringify(body),
+                }
+            );
+
+            last = { response, model, attempts };
+            if (response.ok || !RETRYABLE_STATUSES.has(response.status)) return last;
+
+            const delay = BACKOFF_MS[tryIndex];
+            if (delay !== undefined) await sleep(delay);
+        }
+    }
+
+    return last;
+};
+
 /** Resolves the Appwrite user behind a JWT, or null if it is not valid. */
 export const resolveUser = async (jwt, { endpoint, projectId, fetchImpl = fetch }) => {
     if (!jwt || !endpoint || !projectId) return null;
@@ -176,25 +229,36 @@ export default async (req) => {
     if (!ALLOWED_SECTIONS.includes(section)) return json({ error: "Unsupported resume section." }, 400);
     if (!data) return json({ error: "Add some content to this section first." }, 400);
 
-    const model = normalizeModel(process.env.GEMINI_MODEL);
+    const primary = normalizeModel(process.env.GEMINI_MODEL);
+    const fallback = normalizeModel(process.env.GEMINI_FALLBACK_MODEL || DEFAULT_FALLBACK_MODEL);
+    const candidates = fallback && fallback !== primary ? [primary, fallback] : [primary];
+
+    let model = primary;
 
     try {
-        const response = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
-            {
-                method: "POST",
-                headers: {
-                    "content-type": "application/json",
-                    // Header rather than ?key= so the secret stays out of URLs and logs.
-                    "x-goog-api-key": apiKey,
-                },
-                body: JSON.stringify(buildRequestBody(section, data)),
-            }
-        );
+        const attempt = await callGemini({
+            apiKey,
+            models: candidates,
+            body: buildRequestBody(section, data),
+        });
+
+        const { response, attempts } = attempt;
+        model = attempt.model;
 
         if (!response.ok) {
             const detail = await response.text();
-            console.error(`Gemini ${response.status} for model "${model}": ${detail.slice(0, 1000)}`);
+            console.error(
+                `Gemini ${response.status} after ${attempts} request(s), last model "${model}": ${detail.slice(0, 1000)}`
+            );
+
+            if (RETRYABLE_STATUSES.has(response.status)) {
+                // Already retried and fell back; the upstream is genuinely busy.
+                return failure(
+                    "Gemini is busy right now. Please try again in a moment.",
+                    503,
+                    { model, status: response.status, detail }
+                );
+            }
 
             if (response.status === 429) {
                 return failure("Too many requests right now. Please try again in a minute.", 429, {
