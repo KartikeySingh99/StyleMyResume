@@ -16,9 +16,13 @@ const MAX_INPUT_CHARS = 6000;
 // Floating alias rather than a pinned version, so it does not rot as Google
 // retires model versions.
 const DEFAULT_MODEL = "gemini-flash-latest";
-// Tried when the primary model keeps reporting high demand; a pinned version is
-// often less contended than the alias everyone defaults to.
-const DEFAULT_FALLBACK_MODEL = "gemini-2.5-flash";
+// Also an alias, deliberately. Pinned versions get retired or restricted to
+// existing users (gemini-2.5-flash now 404s for new keys), so pinning a
+// fallback just guarantees a second failure.
+const DEFAULT_FALLBACK_MODEL = "gemini-flash-lite-latest";
+
+// Models that cannot do resume text, so they are never worth suggesting.
+const NON_TEXT_MODEL = /tts|image|embedding|transcribe|audio|banana|lyria|robotics|computer-use|veo/i;
 const MODELS_URL = "https://generativelanguage.googleapis.com/v1beta/models";
 
 // Gemini returns 503 UNAVAILABLE under load and says the spike is temporary, so
@@ -269,13 +273,18 @@ export default async (req) => {
             }
 
             if (response.status === 404) {
-                // Don't assert a cause — report what this key can actually use.
+                // Google's own message is the useful part here — a 404 usually means
+                // the model was retired or restricted to existing users, and the
+                // message names the replacement to migrate to.
+                const upstreamMessage = geminiMessage(detail);
                 const usable = await listUsableModels(apiKey);
-                const options = usable.filter((name) => name.includes("flash")).slice(0, 5);
+                const options = usable.filter((name) => !NON_TEXT_MODEL.test(name)).slice(0, 5);
+
                 return failure(
                     `Gemini rejected model "${model}" (404). ` +
+                        (upstreamMessage ? `${upstreamMessage} ` : "") +
                         (options.length
-                            ? `Models available to this key include: ${options.join(", ")}. Set GEMINI_MODEL to one of them.`
+                            ? `Usable text models for this key: ${options.join(", ")}. Set GEMINI_MODEL to one of them.`
                             : `This key returned no usable models — check that it is valid and the Generative Language API is enabled.`),
                     502,
                     { model, status: response.status, detail }
